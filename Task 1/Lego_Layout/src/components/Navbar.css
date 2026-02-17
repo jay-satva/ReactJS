@@ -1,17 +1,30 @@
-ul {
+.nav-container {
+  display: flex;
+  align-items: center;
+  background-color: #333333;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-brand {
+  min-width: 205px;
+  padding: 0 16px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.nav-container ul {
+  display: flex;
+  flex-direction: row;
   list-style-type: none;
   margin: 0;
   padding: 0;
-  margin-left: 15%;
-  overflow: hidden;
-  background-color: #333333;
+  flex: 1;
 }
 
-ul li {
-  float: left;
-}
-
-ul li a {
+.nav-container ul li a {
   display: block;
   color: white;
   text-align: center;
@@ -19,14 +32,10 @@ ul li a {
   text-decoration: none;
 }
 
-ul li a:hover:not(.active) {
+.nav-container ul li a:hover:not(.active) {
   background-color: #111111;
 }
 
-ul li a.active {
+.nav-container ul li a.active {
   background-color: #04AA6D;
-}
-
-h2{
-  width: 205px;
 }

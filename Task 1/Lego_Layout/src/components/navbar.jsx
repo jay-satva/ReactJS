@@ -1,8 +1,9 @@
 import './navbar.css'
-function Navbar(){
+function Navbar({title}){
     return(
         <>
         <div className='nav-container'>
+        <div className='nav-brand'>{title}</div>
             <ul>
                 <li><a href="#home" className="active">Home</a></li>
                 <li><a href="#news">News</a></li>
