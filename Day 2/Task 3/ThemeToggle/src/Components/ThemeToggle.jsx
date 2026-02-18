@@ -1,9 +1,13 @@
-import {useState, useMemo } from "react";
+import {useState, useMemo, useEffect } from "react";
 
 const bigList = Array.from({ length: 5000 }, (_, i) => `Item ${i + 1}`);
 function ThemeToggle (){
     const [search, setSearch] = useState('')
     const [darkMode, setDarkmode] = useState(false)
+    useEffect(() => {
+        document.body.className = darkMode ? "dark" : "light";
+    }, [darkMode]);
+
     const filterItems = useMemo(() =>{
         return bigList.filter(i=>i.toLowerCase().includes(search.toLowerCase()))
     }, [search])
@@ -12,13 +16,7 @@ function ThemeToggle (){
     }
     return(
         <>
-            <div style={{
-                background: darkMode ? "#222" : "#fff",
-                color: darkMode ? "#fff" : "#000",
-                minHeight: "100vh",
-                padding: "20px"
-                }}>
-                <h2>Heavy Lifter Filter</h2>
+            <div>
 
                 <input
                     type="text"
@@ -33,11 +31,26 @@ function ThemeToggle (){
 
                 <p>Results: {filterItems.length}</p>
 
-                <ol>
-                    {filterItems.slice(0, 10).map((item, index) => (
-                    <li key={index}>{item}</li>
-                    ))}
-                </ol>
+                
+                    <table style={{border: "1px solid black", borderCollapse: "collapse", width: "300px"}}>
+                        <tr>
+                            <th style={{ border: "1px solid black", padding: "8px" }}>Sr. No</th>
+                            <th style={{ border: "1px solid black", padding: "8px" }}>Item</th>
+                        </tr>
+                        <tbody>
+                            {filterItems.slice(0, 10).map((item, index) => (
+                            <tr key={index}>
+                                <td style={{ border: "1px solid black", padding: "8px" }}>
+                                {index + 1}
+                                </td>
+                                <td style={{ border: "1px solid black", padding: "8px" }}>
+                                {item}
+                                </td>
+                            </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                
             </div>
         </>
     )
