@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React.js — The Deep Dive</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2eb;
+    --accent: #e84d2f;
+    --accent2: #2d6af5;
+    --accent3: #f0a500;
+    --muted: #7a7870;
+    --code-bg: #0f1117;
+    --code-border: #2a2d3a;
+    --card: #fff;
+    --border: #d8d4c9;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Instrument Serif', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.75;
+    font-size: 18px;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(245, 242, 235, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 56px;
+    overflow-x: auto;
+  }
+
+  nav a {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--muted);
+    padding: 0 1rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  nav a:hover, nav a.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  nav .logo {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-right: 1rem;
+    padding-right: 1rem;
+    border-right: 1px solid var(--border);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 8rem 6vw 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232, 77, 47, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232, 77, 47, 0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at 60% 50%, black 0%, transparent 70%);
+  }
+
+  .hero-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(52px, 8vw, 110px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    font-family: 'Instrument Serif', serif;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 540px;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+  }
+
+  .hero-chips {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .chip.red { background: var(--accent); }
+  .chip.blue { background: var(--accent2); }
+  .chip.gold { background: var(--accent3); color: var(--ink); }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 7rem 6vw;
+    border-top: 1px solid var(--border);
+    position: relative;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-number::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: 2rem;
+  }
+
+  h2 em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 2.5rem 0 1rem;
+    color: var(--ink);
+  }
+
+  p { margin-bottom: 1.25rem; color: #2a2720; }
+
+  /* ── LAYOUT COLUMNS ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin: 3rem 0;
+  }
+
+  @media (max-width: 900px) {
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 48px; }
+    nav a { font-size: 10px; padding: 0 0.6rem; }
+  }
+
+  /* ── CALLOUT CARDS ── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(232, 77, 47, 0.05);
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .callout.blue {
+    border-color: var(--accent2);
+    background: rgba(45, 106, 245, 0.05);
+  }
+
+  .callout.gold {
+    border-color: var(--accent3);
+    background: rgba(240, 165, 0, 0.06);
+  }
+
+  .callout-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .callout.blue .callout-label { color: var(--accent2); }
+  .callout.gold .callout-label { color: #c07800; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 2rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+
+  .code-header {
+    background: #1a1d27;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--code-border);
+  }
+
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+  }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #ffbd2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+
+  .code-filename {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.05em;
+  }
+
+  .code-body {
+    padding: 1.5rem 1.75rem;
+    overflow-x: auto;
+    color: #e2e8f0;
+  }
+
+  .code-body .kw { color: #c792ea; }
+  .code-body .fn { color: #82aaff; }
+  .code-body .str { color: #c3e88d; }
+  .code-body .cmt { color: #546e7a; font-style: italic; }
+  .code-body .tag { color: #f07178; }
+  .code-body .attr { color: #ffcb6b; }
+  .code-body .val { color: #c3e88d; }
+  .code-body .num { color: #f78c6c; }
+  .code-body .hl {
+    background: rgba(255, 214, 0, 0.1);
+    display: block;
+    margin: 0 -1.75rem;
+    padding: 0 1.75rem;
+    border-left: 3px solid var(--accent3);
+  }
+
+  /* ── DIAGRAM BOXES ── */
+  .diagram {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin: 2.5rem 0;
+    text-align: center;
+  }
+
+  .diagram-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .flow-box {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    letter-spacing: 0.04em;
+  }
+
+  .flow-box.red { background: var(--accent); }
+  .flow-box.blue { background: var(--accent2); }
+  .flow-box.gold { background: var(--accent3); color: var(--ink); }
+  .flow-box.outline {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+  }
+
+  .flow-arrow {
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ── INFO CARDS ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+  }
+
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+  }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 1rem;
+  }
+
+  .card-icon.red { background: rgba(232, 77, 47, 0.12); }
+  .card-icon.blue { background: rgba(45, 106, 245, 0.12); }
+  .card-icon.gold { background: rgba(240, 165, 0, 0.12); }
+  .card-icon.green { background: rgba(34, 197, 94, 0.12); }
+
+  .info-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-card p {
+    font-size: 14.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ── LIFECYCLE TABLE ── */
+  .lifecycle-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 180px;
+    gap: 1rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+
+  .lifecycle-row:last-child { border-bottom: none; }
+
+  .lifecycle-phase {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 6px;
+    text-align: center;
+    width: fit-content;
+  }
+
+  .phase-mount { background: rgba(34, 197, 94, 0.15); color: #16a34a; }
+  .phase-update { background: rgba(45, 106, 245, 0.15); color: #1d4ed8; }
+  .phase-unmount { background: rgba(232, 77, 47, 0.15); color: #b91c1c; }
+
+  .lifecycle-method {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  /* ── BIG QUOTE ── */
+  .big-quote {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(24px, 3.5vw, 42px);
+    font-style: italic;
+    line-height: 1.35;
+    color: var(--ink);
+    margin: 3rem 0;
+    padding-left: 2rem;
+    border-left: 4px solid var(--accent);
+  }
+
+  /* ── STATE VISUALIZER ── */
+  .state-demo {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 2.5rem 0;
+  }
+
+  .state-demo-header {
+    background: var(--ink);
+    padding: 1rem 1.5rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--paper);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .state-demo-body {
+    padding: 2rem 1.75rem;
+  }
+
+  /* ── STEP INDICATORS ── */
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    margin: 2rem 0;
+  }
+
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+    align-items: flex-start;
+  }
+
+  .steps li::before {
+    content: counter(step);
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3px;
+  }
+
+  .steps li .step-content h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 0.4rem;
+  }
+
+  .steps li .step-content p {
+    font-size: 15px;
+    margin: 0;
+    color: var(--muted);
+  }
+
+  /* ── DOM COMPARISON ── */
+  .dom-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2.5rem 0;
+  }
+
+  .dom-side {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .dom-side-header {
+    padding: 1rem 1.5rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .dom-real .dom-side-header { background: #fff1f0; color: #b91c1c; }
+  .dom-virtual .dom-side-header { background: #eff6ff; color: #1d4ed8; }
+
+  .dom-side-body { padding: 1.5rem; font-size: 14.5px; color: var(--muted); line-height: 1.7; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 4rem 6vw;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── HIGHLIGHT MARK ── */
+  mark {
+    background: rgba(232, 77, 47, 0.15);
+    color: var(--accent);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-style: normal;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    background: rgba(0,0,0,0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent2);
+  }
+
+  /* ── LARGE ACCENT NUMBER ── */
+  .accent-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 120px;
+    font-weight: 800;
+    color: rgba(232, 77, 47, 0.08);
+    line-height: 1;
+    position: absolute;
+    right: 6vw;
+    top: 5rem;
+    user-select: none;
+  }
+
+  /* ── TAG BADGE ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1.5px solid currentColor;
+  }
+
+  .badge.red { color: var(--accent); }
+  .badge.blue { color: var(--accent2); }
+
+  /* ── Smooth Scroll offset ── */
+  section[id] { scroll-margin-top: 56px; }
+
+  .separator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 3rem 0;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .separator::before, .separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  pre { white-space: pre; }
+
+  .indent-1 { padding-left: 1.5rem; }
+  .indent-2 { padding-left: 3rem; }
+  .indent-3 { padding-left: 4.5rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="logo active">React ⚛</a>
+  <a href="#overview">Overview</a>
+  <a href="#vdom">Virtual DOM</a>
+  <a href="#install">Installation</a>
+  <a href="#structure">App Structure</a>
+  <a href="#components">Components</a>
+  <a href="#lifecycle">Lifecycle</a>
+  <a href="#state">State</a>
+</nav>
+
+<!-- HERO -->
+<div id="hero" class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-tag">The Complete Deep Dive</div>
+  <h1>Master<br><em>React.js</em><br>From Zero</h1>
+  <p class="hero-sub">Every concept explained with brutal clarity — from what React actually IS, to how State flows through your entire application.</p>
+  <div class="hero-chips">
+    <span class="chip red">React 18+</span>
+    <span class="chip blue">Hooks</span>
+    <span class="chip gold">JSX</span>
+    <span class="chip">Virtual DOM</span>
+    <span class="chip">Components</span>
+    <span class="chip">State</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 01 · OVERVIEW -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="overview">
+  <div class="accent-num">01</div>
+  <div class="section-number">Section 01</div>
+  <h2>Overview of <em>React.js</em></h2>
+
+  <div class="two-col">
+    <div>
+      <p>React is a <strong>JavaScript library</strong> built by Facebook (now Meta) in 2013. But calling it just a "library" undersells what it really is — it's a completely different <em>way of thinking</em> about building user interfaces.</p>
+
+      <p>Before React, building a dynamic web page meant this: when data changed, you'd hunt down the specific HTML element in the DOM, reach in, and update it manually. You were constantly juggling the <em>state of your data</em> and the <em>state of your UI</em>, keeping them in sync by hand. It was fragile, error-prone, and a nightmare to scale.</p>
+
+      <p>React's big idea was radical: <strong>describe what your UI should look like at any given moment, and let React figure out how to make it happen.</strong></p>
+    </div>
+    <div>
+      <div class="callout">
+        <div class="callout-label">The Core Philosophy</div>
+        <p style="margin:0; font-size:15px;">React is <strong>declarative</strong>. You don't say "find the button, change its color to red." You say "when the user is logged in, the button IS red." React handles the rest.</p>
+      </div>
+      <div class="callout blue">
+        <div class="callout-label">Component-Based</div>
+        <p style="margin:0; font-size:15px;">Your entire UI is built from small, reusable, independent pieces called <strong>components</strong>. Each component manages its own logic and appearance, like LEGO bricks.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="big-quote">"React lets you build UI the same way you think — in terms of <em>what it should be</em>, not <em>how to get there.</em>"</div>
+
+  <h3>Why React Over Plain JavaScript?</h3>
+
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-icon red">🎯</div>
+      <h4>Predictable UI Updates</h4>
+      <p>When your data (state) changes, React automatically re-renders the right parts of the UI. No more manual DOM manipulation.</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon blue">🧩</div>
+      <h4>Reusable Components</h4>
+      <p>Build a Button component once, use it 500 times across your app. Change it in one place, it updates everywhere.</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon gold">⚡</div>
+      <h4>Virtual DOM Performance</h4>
+      <p>React doesn't touch the real DOM unless absolutely necessary. It uses a clever virtual copy to minimize expensive real DOM operations.</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon green">🌍</div>
+      <h4>Massive Ecosystem</h4>
+      <p>React has the largest ecosystem in frontend development. Routing, state management, UI libraries — everything exists for React.</p>
+    </div>
+  </div>
+
+  <h3>The Imperative vs Declarative Difference</h3>
+  <p>This is the most important concept to grasp before anything else. Let's look at a real example:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">❌ Imperative — Old Way (Vanilla JS)</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt">// When a user logs in, I have to do ALL of this manually:</span>
+<span class="kw">const</span> <span class="fn">handleLogin</span> = (<span class="fn">user</span>) => {
+  <span class="cmt">// 1. Find the element</span>
+  <span class="kw">const</span> btn = document.<span class="fn">getElementById</span>(<span class="str">'login-btn'</span>);
+  <span class="cmt">// 2. Change its text</span>
+  btn.textContent = <span class="str">`Hello, ${user.name}`</span>;
+  <span class="cmt">// 3. Change its style</span>
+  btn.style.background = <span class="str">'green'</span>;
+  <span class="cmt">// 4. Hide the login form</span>
+  document.<span class="fn">getElementById</span>(<span class="str">'login-form'</span>).style.display = <span class="str">'none'</span>;
+  <span class="cmt">// 5. Show the dashboard</span>
+  document.<span class="fn">getElementById</span>(<span class="str">'dashboard'</span>).style.display = <span class="str">'block'</span>;
+  <span class="cmt">// 6. Update the avatar</span>
+  document.<span class="fn">getElementById</span>(<span class="str">'avatar'</span>).src = user.avatar;
+  <span class="cmt">// You're managing 6 DOM operations. Miss one = broken UI.</span>
+};</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">✅ Declarative — React Way</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt">// Just describe what the UI LOOKS LIKE based on state.</span>
+<span class="cmt">// React figures out ALL the DOM changes automatically.</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [<span class="fn">user</span>, <span class="fn">setUser</span>] = <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="kw">if</span> (!user) {
+    <span class="kw">return</span> &lt;<span class="tag">LoginForm</span> <span class="attr">onLogin</span>=<span class="val">{setUser}</span> /&gt;;
+  }
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">Dashboard</span>
+      <span class="attr">user</span>=<span class="val">{user}</span>
+      <span class="attr">greeting</span>=<span class="val">{`Hello, ${user.name}`}</span>
+    /&gt;
+  );
+  <span class="cmt">// React automatically shows LoginForm when user=null</span>
+  <span class="cmt">// and Dashboard when user is set. ZERO manual DOM work.</span>
+}</pre></div>
+  </div>
+
+  <div class="callout gold">
+    <div class="callout-label">Key Insight</div>
+    <p style="margin:0; font-size:15px;">In React, you describe <em>what the UI should look like given the current data</em>. The moment the data changes, React re-renders and applies the minimum possible changes to the real DOM. You never touch the DOM directly.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 02 · VIRTUAL DOM -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="vdom">
+  <div class="accent-num">02</div>
+  <div class="section-number">Section 02</div>
+  <h2>The Virtual <em>DOM</em></h2>
+
+  <p>To understand the Virtual DOM, you first need to understand why it was invented — and that means understanding the real DOM's biggest problem.</p>
+
+  <h3>Why the Real DOM is Slow</h3>
+
+  <div class="dom-compare">
+    <div class="dom-side dom-real">
+      <div class="dom-side-header">🐢 Real DOM Problem</div>
+      <div class="dom-side-body">
+        <p>The Real DOM (Document Object Model) is the browser's live representation of your HTML. Whenever you change it — even one tiny attribute — the browser may:</p>
+        <p>1. <strong>Recalculate styles</strong> for affected elements<br>
+        2. <strong>Reflow</strong> (recalculate positions/sizes)<br>
+        3. <strong>Repaint</strong> (redraw pixels on screen)</p>
+        <p>These operations are <strong>extremely expensive</strong>. In a complex app updating dozens of elements per second, this causes lag and jank.</p>
+      </div>
+    </div>
+    <div class="dom-side dom-virtual">
+      <div class="dom-side-header">⚡ Virtual DOM Solution</div>
+      <div class="dom-side-body">
+        <p>React keeps a <strong>lightweight JavaScript copy</strong> of the DOM in memory — the Virtual DOM. It's just a plain object tree, not real browser DOM nodes.</p>
+        <p>Operations on a JavaScript object are <strong>incredibly fast</strong> — thousands of times faster than touching real DOM nodes.</p>
+        <p>React batches changes, computes the minimal diff, then makes exactly the right real DOM updates in one efficient pass.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>How Virtual DOM Works: Step by Step</h3>
+
+  <div class="diagram">
+    <div class="diagram-title">The Reconciliation Process</div>
+    <div class="flow" style="gap:0.75rem; justify-content:center;">
+      <div class="flow-box red">State Changes</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">New Virtual DOM Created</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box gold">Diff Old vs New<br><small style="font-size:10px;font-weight:400">(Diffing Algorithm)</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Patch Real DOM<br><small style="font-size:10px;font-weight:400;color:#aaa">(Minimal Changes Only)</small></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h3>Step 1 — State Changes</h3>
+      <p>Imagine you have a counter displaying "5". The user clicks "+1". React knows state changed from 5 → 6.</p>
+
+      <h3>Step 2 — New Virtual DOM Tree</h3>
+      <p>React runs your component function again and creates a <em>new</em> Virtual DOM tree — a fresh JavaScript object representing the new UI (with "6" in it).</p>
+
+      <h3>Step 3 — Diffing (Reconciliation)</h3>
+      <p>React compares the OLD Virtual DOM tree with the NEW Virtual DOM tree using its diffing algorithm. It asks: <em>"What changed?"</em></p>
+      <p>In our counter example, it finds: <mark>only the text node "5" → "6" changed</mark>. Everything else is identical.</p>
+    </div>
+    <div>
+      <h3>Step 4 — Patch the Real DOM</h3>
+      <p>React now touches the real DOM with <strong>surgical precision</strong> — it changes only that one text node. Not the button, not the wrapper div, not the paragraph next to it. Just the exact character that changed.</p>
+
+      <div class="callout blue">
+        <div class="callout-label">Real-World Impact</div>
+        <p style="margin:0; font-size:14.5px;">In a Twitter-style feed with 500 posts, if you like one post, React changes only the heart icon's state on that one post. It doesn't re-render all 500 posts. Without Virtual DOM, naive implementations would touch or re-render far more.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="separator">Under The Hood</div>
+
+  <h3>What does a Virtual DOM node actually look like?</h3>
+  <p>It's just a plain JavaScript object. Nothing magical — just a description of a DOM element:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">Virtual DOM — Plain JavaScript Object</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt">// When you write JSX like this:</span>
+&lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="val">"card"</span>&gt;
+  &lt;<span class="tag">h1</span>&gt;Hello World&lt;/<span class="tag">h1</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Welcome!&lt;/<span class="tag">p</span>&gt;
+&lt;/<span class="tag">div</span>&gt;
+
+<span class="cmt">// React internally converts it to this object:</span>
+{
+  <span class="attr">type</span>: <span class="str">'div'</span>,
+  <span class="attr">props</span>: {
+    <span class="attr">className</span>: <span class="str">'card'</span>,
+    <span class="attr">children</span>: [
+      {
+        <span class="attr">type</span>: <span class="str">'h1'</span>,
+        <span class="attr">props</span>: { <span class="attr">children</span>: <span class="str">'Hello World'</span> }
+      },
+      {
+        <span class="attr">type</span>: <span class="str">'p'</span>,
+        <span class="attr">props</span>: { <span class="attr">children</span>: <span class="str">'Welcome!'</span> }
+      }
+    ]
+  }
+}
+<span class="cmt">// Comparing two of these plain objects is FAST.</span>
+<span class="cmt">// Manipulating real DOM is SLOW. That's the whole trick.</span></pre></div>
+  </div>
+
+  <div class="callout gold">
+    <div class="callout-label">Common Misconception</div>
+    <p style="margin:0; font-size:15px;">The Virtual DOM isn't always faster than directly manipulating the real DOM. In simple cases, direct DOM manipulation can be faster. The Virtual DOM's value is in <strong>making it easy to build complex apps without worrying about performance</strong> — React optimizes for you automatically.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 03 · INSTALLATION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="install">
+  <div class="accent-num">03</div>
+  <div class="section-number">Section 03</div>
+  <h2>Creating Your <em>First React Project</em></h2>
+
+  <p>There are multiple ways to set up a React project. We'll cover the modern, recommended approaches — and explain <em>why</em> each exists.</p>
+
+  <h3>What You Need First</h3>
+  <div class="callout blue">
+    <div class="callout-label">Prerequisites</div>
+    <p style="margin:0; font-size:15px;"><strong>Node.js</strong> (v18+ recommended) — React apps are developed using Node's build tools. Download from <code>nodejs.org</code>. This also gives you <code>npm</code> (Node Package Manager) automatically. Verify with: <code>node -v</code> and <code>npm -v</code></p>
+  </div>
+
+  <div class="separator">Method 1 — Recommended</div>
+
+  <h3>Using Vite (The Modern Way)</h3>
+  <p>Vite is a blazing-fast build tool. It starts your dev server in milliseconds and is the current industry standard for new React projects.</p>
+
+  <ol class="steps">
+    <li>
+      <div class="step-content">
+        <h4>Create the project</h4>
+        <p>Run this single command in your terminal. Replace <code>my-app</code> with your project name.</p>
+      </div>
+    </li>
+  </ol>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">Terminal</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt"># Create a new Vite + React project</span>
+npm create vite@latest my-app -- --template react
+
+<span class="cmt"># Move into the project folder</span>
+cd my-app
+
+<span class="cmt"># Install all dependencies</span>
+npm install
+
+<span class="cmt"># Start the development server</span>
+npm run dev</pre></div>
+  </div>
+
+  <p>After <code>npm run dev</code>, open your browser to <code>http://localhost:5173</code>. You'll see the React welcome screen. Your app is live! 🎉</p>
+
+  <div class="separator">Method 2 — With Routing & More</div>
+
+  <h3>Using Create React App (CRA) — Traditional</h3>
+  <p>This was the official way to create React apps for years. It's slightly slower than Vite but still widely used in existing projects.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">Terminal — CRA</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt"># Uses npx to run without installing globally</span>
+npx create-react-app my-app
+
+cd my-app
+
+<span class="cmt"># Start development server on port 3000</span>
+npm start</pre></div>
+  </div>
+
+  <div class="separator">Method 3 — Full-Stack Framework</div>
+
+  <h3>Using Next.js (For Production Apps)</h3>
+  <p>Next.js is built on top of React and adds routing, server-side rendering, API routes, and more. Most professional React apps use Next.js today.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">Terminal — Next.js</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt"># Creates a full Next.js + React app with guided setup</span>
+npx create-next-app@latest my-app
+
+cd my-app
+npm run dev
+<span class="cmt"># Opens at http://localhost:3000</span></pre></div>
+  </div>
+
+  <div class="callout gold">
+    <div class="callout-label">Which should I use?</div>
+    <p style="margin:0; font-size:15px;">
+      <strong>Learning React?</strong> → Use Vite (<code>npm create vite@latest</code>) — fast and clean.<br>
+      <strong>Building a real product?</strong> → Use Next.js — it handles SEO, routing, and deployment.<br>
+      <strong>Working on old codebase?</strong> → You might encounter Create React App — know it, but prefer Vite for new projects.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 04 · APP STRUCTURE -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="structure">
+  <div class="accent-num">04</div>
+  <div class="section-number">Section 04</div>
+  <h2>App <em>Structure</em> Explained</h2>
+
+  <p>When you create a React project, you get a bunch of files and folders. Let's tear every single one apart and understand exactly what it does and why it exists.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">Project File Tree (Vite)</span>
+    </div>
+    <div class="code-body"><pre>my-app/
+├── node_modules/          <span class="cmt">← All installed packages live here</span>
+├── public/
+│   └── vite.svg           <span class="cmt">← Static files (images, favicon, etc.)</span>
+├── src/
+│   ├── assets/
+│   │   └── react.svg      <span class="cmt">← Asset files (images, fonts)</span>
+│   ├── App.css            <span class="cmt">← Styles for App component</span>
+│   ├── App.jsx            <span class="cmt">← Root component of your app</span>
+│   ├── index.css          <span class="cmt">← Global styles</span>
+│   └── main.jsx           <span class="cmt">← Entry point — where React boots up</span>
+├── .gitignore             <span class="cmt">← Files Git should ignore</span>
+├── index.html             <span class="cmt">← The ONE HTML file (Single Page App!)</span>
+├── package.json           <span class="cmt">← Project config, scripts, dependencies</span>
+├── package-lock.json      <span class="cmt">← Exact locked versions of dependencies</span>
+└── vite.config.js         <span class="cmt">← Vite build configuration</span></pre></div>
+  </div>
+
+  <h3>The Most Important Files</h3>
+
+  <div class="two-col">
+    <div>
+      <h3 style="margin-top:0">📄 index.html — The Shell</h3>
+      <p>Your entire app has only <strong>ONE HTML file</strong>. This is what "Single Page Application" means — the browser loads this once, and React handles all navigation and updates from there on. Notice the magical <code>div</code>:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-filename">index.html</span>
+        </div>
+        <div class="code-body"><pre>&lt;<span class="tag">body</span>&gt;
+  <span class="cmt">&lt;!-- This ONE div is your entire app --&gt;</span>
+  &lt;<span class="tag">div</span> <span class="attr">id</span>=<span class="val">"root"</span>&gt;&lt;/<span class="tag">div</span>&gt;
+
+  <span class="cmt">&lt;!-- React's JS bundle gets injected here --&gt;</span>
+  &lt;<span class="tag">script</span> <span class="attr">type</span>=<span class="val">"module"</span>
+    <span class="attr">src</span>=<span class="val">"/src/main.jsx"</span>&gt;&lt;/<span class="tag">script</span>&gt;
+&lt;/<span class="tag">body</span>&gt;</pre></div>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-top:0">🚀 main.jsx — The Ignition</h3>
+      <p>This is where React <strong>attaches itself</strong> to the HTML. It finds that <code>div#root</code> and tells React to take control of it. Everything your user sees is rendered inside this root:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-filename">src/main.jsx</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">import</span> React <span class="kw">from</span> <span class="str">'react'</span>
+<span class="kw">import</span> ReactDOM <span class="kw">from</span> <span class="str">'react-dom/client'</span>
+<span class="kw">import</span> App <span class="kw">from</span> <span class="str">'./App.jsx'</span>
+<span class="kw">import</span> <span class="str">'./index.css'</span>
+
+<span class="cmt">// 1. Find the #root div in index.html</span>
+<span class="cmt">// 2. Tell React to take over that div</span>
+<span class="cmt">// 3. Render the App component inside it</span>
+ReactDOM
+  .<span class="fn">createRoot</span>(document.<span class="fn">getElementById</span>(<span class="str">'root'</span>))
+  .<span class="fn">render</span>(&lt;<span class="tag">App</span> /&gt;);</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="separator">The Component Tree</div>
+
+  <h3>How Components Form a Tree</h3>
+  <p>Your entire app is a tree of components, with <code>App</code> at the root. Data flows down this tree, events bubble up:</p>
+
+  <div class="diagram">
+    <div class="diagram-title">React Component Tree Structure</div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+      <div class="flow-box red" style="font-size:14px; padding:12px 24px;">&lt;App /&gt; — Root</div>
+      <div style="display:flex; gap:3rem; align-items:flex-start; margin-top:0.5rem;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+          <div class="flow-box blue">&lt;Header /&gt;</div>
+          <div style="display:flex; gap:1rem;">
+            <div class="flow-box outline">&lt;Logo /&gt;</div>
+            <div class="flow-box outline">&lt;Nav /&gt;</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+          <div class="flow-box blue">&lt;Main /&gt;</div>
+          <div style="display:flex; gap:1rem;">
+            <div class="flow-box outline">&lt;Sidebar /&gt;</div>
+            <div class="flow-box gold">&lt;Feed /&gt;</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+          <div class="flow-box blue">&lt;Footer /&gt;</div>
+          <div class="flow-box outline">&lt;Links /&gt;</div>
+        </div>
+      </div>
+      <div style="font-family:'Syne',sans-serif; font-size:11px; color:var(--muted); margin-top:1rem; letter-spacing:0.05em;">Props flow ↓ down &nbsp;&nbsp;|&nbsp;&nbsp; Events bubble ↑ up</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">The Golden Rule</div>
+    <p style="margin:0; font-size:15px;"><strong>src/ is your kingdom.</strong> Everything you write lives in <code>src/</code>. Organize it into <code>components/</code>, <code>pages/</code>, <code>hooks/</code>, <code>utils/</code> folders as your app grows. React doesn't enforce a folder structure — but convention matters for maintainability.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 05 · COMPONENTS -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="components">
+  <div class="accent-num">05</div>
+  <div class="section-number">Section 05</div>
+  <h2><em>Components</em> — The Heart of React</h2>
+
+  <p>Components are the fundamental building blocks of React. Everything you see on screen is a component or made of components. Think of them as smart HTML elements that can have their own data, logic, and appearance.</p>
+
+  <div class="big-quote">"A component is just a JavaScript function that returns what the UI should look like."</div>
+
+  <h3>The Modern Way: Function Components</h3>
+  <p>Today, all React components are written as <strong>functions</strong>. They receive data (called <code>props</code>) and return JSX (HTML-like syntax) describing the UI:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">components/UserCard.jsx</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt">// A component is just a function with a capital first letter</span>
+<span class="kw">function</span> <span class="fn">UserCard</span>({ <span class="fn">name</span>, <span class="fn">role</span>, <span class="fn">avatar</span> }) {
+  <span class="cmt">// JSX: looks like HTML but it's JavaScript!</span>
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="val">"card"</span>&gt;
+      &lt;<span class="tag">img</span> <span class="attr">src</span>=<span class="val">{avatar}</span> <span class="attr">alt</span>=<span class="val">{name}</span> /&gt;
+      &lt;<span class="tag">h2</span>&gt;{name}&lt;/<span class="tag">h2</span>&gt;   <span class="cmt">{/* {} lets you inject JS into JSX */}</span>
+      &lt;<span class="tag">p</span>&gt;{role}&lt;/<span class="tag">p</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="cmt">// Now use it like an HTML tag, anywhere in your app:</span>
+&lt;<span class="tag">UserCard</span>
+  <span class="attr">name</span>=<span class="val">"Sarah Kim"</span>
+  <span class="attr">role</span>=<span class="val">"Senior Engineer"</span>
+  <span class="attr">avatar</span>=<span class="val">"/sarah.jpg"</span>
+/&gt;
+
+<span class="cmt">// Same component, different data = different card!</span>
+&lt;<span class="tag">UserCard</span>
+  <span class="attr">name</span>=<span class="val">"Marcus Lee"</span>
+  <span class="attr">role</span>=<span class="val">"Product Designer"</span>
+  <span class="attr">avatar</span>=<span class="val">"/marcus.jpg"</span>
+/&gt;</pre></div>
+  </div>
+
+  <h3>Understanding JSX</h3>
+  <p>JSX stands for <strong>JavaScript XML</strong>. It's syntactic sugar that lets you write HTML-like code inside JavaScript. The browser doesn't understand JSX — Babel (a tool) compiles it to plain <code>React.createElement()</code> calls:</p>
+
+  <div class="two-col">
+    <div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-filename">What you write (JSX)</span>
+        </div>
+        <div class="code-body"><pre>&lt;<span class="tag">button</span>
+  <span class="attr">className</span>=<span class="val">"btn"</span>
+  <span class="attr">onClick</span>=<span class="val">{handleClick}</span>
+&gt;
+  Click Me!
+&lt;/<span class="tag">button</span>&gt;</pre></div>
+      </div>
+    </div>
+    <div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-filename">What Babel compiles it to</span>
+        </div>
+        <div class="code-body"><pre>React.<span class="fn">createElement</span>(
+  <span class="str">'button'</span>,
+  {
+    <span class="attr">className</span>: <span class="str">'btn'</span>,
+    <span class="attr">onClick</span>: handleClick
+  },
+  <span class="str">'Click Me!'</span>
+)</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>JSX Golden Rules</h3>
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-icon red">1️⃣</div>
+      <h4>One Root Element</h4>
+      <p>Every component must return a single root element. Use <code>&lt;div&gt;</code>, a Fragment <code>&lt;&gt;&lt;/&gt;</code>, or any wrapper.</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon blue">2️⃣</div>
+      <h4>className, not class</h4>
+      <p>Since JSX is JavaScript, use <code>className</code> instead of <code>class</code> (class is a reserved JS keyword).</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon gold">3️⃣</div>
+      <h4>Close ALL Tags</h4>
+      <p>In HTML, <code>&lt;img&gt;</code> is fine. In JSX, you MUST close it: <code>&lt;img /&gt;</code>. Every tag must be properly closed.</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon green">4️⃣</div>
+      <h4>JS in Curly Braces</h4>
+      <p>Inject any JavaScript expression using <code>{ }</code>. Variables, ternaries, function calls — all valid inside JSX.</p>
+    </div>
+  </div>
+
+  <div class="separator">Props — Passing Data</div>
+
+  <h3>Props: Talking to Components</h3>
+  <p>Props (short for properties) are how you pass data <strong>from parent to child</strong>. They're like function arguments for your components. A component can never modify its own props — they're read-only:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">Props in Action</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt">// PARENT — passes data as "attributes" to child</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">Greeting</span>
+      <span class="attr">name</span>=<span class="val">"Alex"</span>
+      <span class="attr">age</span>=<span class="val">{25}</span>                 <span class="cmt">{/* Numbers in {} */}</span>
+      <span class="attr">isLoggedIn</span>=<span class="val">{true}</span>         <span class="cmt">{/* Booleans in {} */}</span>
+      <span class="attr">colors</span>=<span class="val">{['red', 'blue']}</span>  <span class="cmt">{/* Arrays in {} */}</span>
+    /&gt;
+  );
+}
+
+<span class="cmt">// CHILD — receives props as a parameter object</span>
+<span class="kw">function</span> <span class="fn">Greeting</span>({ <span class="fn">name</span>, <span class="fn">age</span>, <span class="fn">isLoggedIn</span>, <span class="fn">colors</span> }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      <span class="cmt">{/* Conditional rendering with ternary */}</span>
+      {isLoggedIn
+        ? &lt;<span class="tag">p</span>&gt;Welcome back, {name}! You are {age} years old.&lt;/<span class="tag">p</span>&gt;
+        : &lt;<span class="tag">p</span>&gt;Please log in.&lt;/<span class="tag">p</span>&gt;
+      }
+      <span class="cmt">{/* Rendering a list with .map() */}</span>
+      &lt;<span class="tag">ul</span>&gt;
+        {colors.<span class="fn">map</span>(color =&gt;
+          &lt;<span class="tag">li</span> <span class="attr">key</span>=<span class="val">{color}</span>&gt;{color}&lt;/<span class="tag">li</span>&gt;  <span class="cmt">{/* key is required for lists! */}</span>
+        )}
+      &lt;/<span class="tag">ul</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre></div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">Props are Read-Only</div>
+    <p style="margin:0; font-size:15px;">A child component <strong>never modifies its own props</strong>. Data flows one direction: parent → child. If a child needs to update data, it calls a <em>function</em> passed down as a prop (callback pattern). This one-directional flow is what makes React apps predictable and debuggable.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 06 · LIFECYCLE -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="lifecycle">
+  <div class="accent-num">06</div>
+  <div class="section-number">Section 06</div>
+  <h2>Component <em>Lifecycle</em></h2>
+
+  <p>Every React component has a lifecycle — it's <strong>born</strong> (mounts), <strong>lives and updates</strong> (updates), and eventually <strong>dies</strong> (unmounts). Understanding this lifecycle is how you run code at the right time — fetching data, setting up subscriptions, cleaning up timers.</p>
+
+  <div class="diagram">
+    <div class="diagram-title">Component Lifecycle Phases</div>
+    <div style="display:flex; gap:1rem; justify-content:center; align-items:stretch; flex-wrap:wrap;">
+      <div style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.3); border-radius:10px; padding:1.5rem; text-align:left; min-width:180px;">
+        <div class="lifecycle-phase phase-mount" style="margin-bottom:0.75rem;">Mount</div>
+        <p style="font-size:13px; color:var(--muted); margin:0; line-height:1.5;">Component appears in the DOM for the first time. Good time to: fetch initial data, set up subscriptions.</p>
+      </div>
+      <div style="display:flex; align-items:center; font-size:28px; color:var(--muted);">→</div>
+      <div style="background:rgba(45,106,245,0.08); border:1px solid rgba(45,106,245,0.3); border-radius:10px; padding:1.5rem; text-align:left; min-width:180px;">
+        <div class="lifecycle-phase phase-update" style="margin-bottom:0.75rem;">Update</div>
+        <p style="font-size:13px; color:var(--muted); margin:0; line-height:1.5;">State or props changed. Component re-renders. Good time to: respond to data changes, update external APIs.</p>
+      </div>
+      <div style="display:flex; align-items:center; font-size:28px; color:var(--muted);">→</div>
+      <div style="background:rgba(232,77,47,0.08); border:1px solid rgba(232,77,47,0.3); border-radius:10px; padding:1.5rem; text-align:left; min-width:180px;">
+        <div class="lifecycle-phase phase-unmount" style="margin-bottom:0.75rem;">Unmount</div>
+        <p style="font-size:13px; color:var(--muted); margin:0; line-height:1.5;">Component removed from DOM. Critical time to: clear timers, cancel subscriptions, prevent memory leaks.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>The useEffect Hook — Lifecycle in Modern React</h3>
+  <p>In modern React (hooks era), lifecycle is handled with <code>useEffect</code>. It's one function that handles all three phases, controlled by its <strong>dependency array</strong>:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">useEffect — Complete Guide</span>
+    </div>
+    <div class="code-body"><pre><span class="kw">import</span> { <span class="fn">useState</span>, <span class="fn">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">DataFetcher</span>({ <span class="fn">userId</span> }) {
+  <span class="kw">const</span> [data, setData] = <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="cmt">// ── 1. RUNS ONCE (on Mount) ──────────────────────────────</span>
+  <span class="cmt">// Empty array [] = "run this effect only when component mounts"</span>
+  <span class="fn">useEffect</span>(() => {
+    console.<span class="fn">log</span>(<span class="str">'Component mounted! Fetch initial data.'</span>);
+    <span class="kw">return</span> () => console.<span class="fn">log</span>(<span class="str">'Component unmounted! Cleanup here.'</span>);
+  }, []);  <span class="cmt">// &lt;-- Empty dependency array</span>
+
+  <span class="cmt">// ── 2. RUNS ON UPDATE (when userId changes) ───────────────</span>
+  <span class="cmt">// [userId] = "re-run whenever userId changes"</span>
+  <span class="fn">useEffect</span>(() => {
+    <span class="cmt">// Fetch data whenever userId changes</span>
+    fetch(<span class="str">`/api/users/${userId}`</span>)
+      .<span class="fn">then</span>(res => res.<span class="fn">json</span>())
+      .<span class="fn">then</span>(data => <span class="fn">setData</span>(data));
+  }, [userId]);  <span class="cmt">// &lt;-- Re-runs when userId changes</span>
+
+  <span class="cmt">// ── 3. RUNS ON EVERY RENDER ───────────────────────────────</span>
+  <span class="cmt">// No array = "run after every single render"</span>
+  <span class="fn">useEffect</span>(() => {
+    console.<span class="fn">log</span>(<span class="str">'This runs on EVERY render. Use sparingly!'</span>);
+  });  <span class="cmt">// &lt;-- No dependency array at all</span>
+
+  <span class="cmt">// ── 4. CLEANUP (Unmount) ──────────────────────────────────</span>
+  <span class="cmt">// The function you RETURN from useEffect is the cleanup</span>
+  <span class="fn">useEffect</span>(() => {
+    <span class="kw">const</span> timer = <span class="fn">setInterval</span>(() => console.<span class="fn">log</span>(<span class="str">'tick'</span>), <span class="num">1000</span>);
+
+    <span class="kw">return</span> () => {
+      <span class="fn">clearInterval</span>(timer);  <span class="cmt">// This runs when component unmounts</span>
+      <span class="cmt">// Without this, the timer keeps running even after</span>
+      <span class="cmt">// the component is gone — a memory leak!</span>
+    };
+  }, []);
+}</pre></div>
+  </div>
+
+  <h3>Real-World Lifecycle Example: Data Fetching</h3>
+  <p>Here's a complete, practical example combining everything — mounting, updating, and unmounting lifecycle:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">components/UserProfile.jsx — Full Lifecycle Example</span>
+    </div>
+    <div class="code-body"><pre><span class="kw">function</span> <span class="fn">UserProfile</span>({ <span class="fn">userId</span> }) {
+  <span class="kw">const</span> [user, <span class="fn">setUser</span>] = <span class="fn">useState</span>(<span class="kw">null</span>);
+  <span class="kw">const</span> [loading, <span class="fn">setLoading</span>] = <span class="fn">useState</span>(<span class="kw">true</span>);
+  <span class="kw">const</span> [error, <span class="fn">setError</span>] = <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="fn">useEffect</span>(() => {
+    <span class="cmt">// MOUNT + UPDATE: fetch user whenever userId changes</span>
+    <span class="fn">setLoading</span>(<span class="kw">true</span>);
+
+    <span class="cmt">// AbortController lets us cancel the fetch on unmount</span>
+    <span class="kw">const</span> controller = <span class="kw">new</span> <span class="fn">AbortController</span>();
+
+    fetch(<span class="str">`/api/users/${userId}`</span>, { <span class="attr">signal</span>: controller.signal })
+      .<span class="fn">then</span>(res => res.<span class="fn">json</span>())
+      .<span class="fn">then</span>(data => {
+        <span class="fn">setUser</span>(data);
+        <span class="fn">setLoading</span>(<span class="kw">false</span>);
+      })
+      .<span class="fn">catch</span>(err => {
+        <span class="kw">if</span> (err.name !== <span class="str">'AbortError'</span>) <span class="fn">setError</span>(err);
+      });
+
+    <span class="cmt">// CLEANUP (Unmount): Cancel in-flight request</span>
+    <span class="kw">return</span> () => controller.<span class="fn">abort</span>();
+
+  }, [userId]);  <span class="cmt">// Re-run whenever userId changes</span>
+
+  <span class="kw">if</span> (loading) <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;Loading...&lt;/<span class="tag">p</span>&gt;;
+  <span class="kw">if</span> (error)   <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;Error: {error.message}&lt;/<span class="tag">p</span>&gt;;
+
+  <span class="kw">return</span> &lt;<span class="tag">div</span>&gt;{user.name}&lt;/<span class="tag">div</span>&gt;;
+}</pre></div>
+  </div>
+
+  <div class="callout gold">
+    <div class="callout-label">The Dependency Array Mental Model</div>
+    <p style="margin:0; font-size:15px;">Think of the dependency array as a <strong>watch list</strong>. You're saying: "React, watch these values. Whenever any of them change, re-run my effect." An empty <code>[]</code> means "watch nothing — run once." No array means "run after everything." Include every variable your effect uses in the array.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 07 · STATE -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="state">
+  <div class="accent-num">07</div>
+  <div class="section-number">Section 07</div>
+  <h2>State — The <em>Brain</em> of React</h2>
+
+  <p>State is the most powerful and important concept in React. If you truly understand state, you understand React. Let's go deep.</p>
+
+  <div class="big-quote">"State is data that, when changed, causes your component to re-render with the new data automatically."</div>
+
+  <h3>Why Not Just Use Regular Variables?</h3>
+  <p>This is the #1 question beginners have. Let's prove why regular variables don't work:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">❌ Why Regular Variables Fail</span>
+    </div>
+    <div class="code-body"><pre><span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="kw">let</span> count = <span class="num">0</span>;  <span class="cmt">// Regular variable</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">p</span>&gt;Count: {count}&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>=<span class="val">{() => count++}</span>&gt;Increment&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+<span class="cmt">// 🚨 PROBLEM: count DOES increment internally,
+// but React has NO IDEA it changed!
+// React only re-renders when STATE changes.
+// Regular variables silently change and nothing updates on screen.</span></pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">✅ useState — The Right Way</span>
+    </div>
+    <div class="code-body"><pre><span class="kw">import</span> { <span class="fn">useState</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="cmt">// useState returns [currentValue, setterFunction]</span>
+  <span class="cmt">// 0 is the initial value</span>
+  <span class="kw">const</span> [<span class="fn">count</span>, <span class="fn">setCount</span>] = <span class="fn">useState</span>(<span class="num">0</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">p</span>&gt;Count: {count}&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>=<span class="val">{() => setCount(count + 1)}</span>&gt;
+        Increment
+      &lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+  <span class="cmt">// ✅ When setCount is called:
+  // 1. React saves the new count value
+  // 2. React re-renders the Counter component
+  // 3. The new count appears on screen
+  // Automatic. Magical. Reliable.</span>
+}</pre></div>
+  </div>
+
+  <div class="separator">Deep Dive</div>
+
+  <h3>How useState Works Internally</h3>
+
+  <div class="diagram">
+    <div class="diagram-title">The State Update Cycle</div>
+    <div style="display:flex; flex-direction:column; gap:0.75rem; align-items:center;">
+      <div class="flow-box blue">User calls setCount(5)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box">React schedules re-render</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box red">Component function runs again</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box gold">useState returns new value (5)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box">React diffs Virtual DOM</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box blue">Real DOM updated with minimum changes</div>
+    </div>
+  </div>
+
+  <h3>State with Objects and Arrays</h3>
+  <p>When state is an object or array, you <strong>must not mutate it directly</strong>. You must create a <em>new</em> copy with the changes. This is how React detects that something changed:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">State with Objects & Arrays</span>
+    </div>
+    <div class="code-body"><pre><span class="kw">function</span> <span class="fn">ProfileEditor</span>() {
+  <span class="kw">const</span> [user, <span class="fn">setUser</span>] = <span class="fn">useState</span>({
+    <span class="attr">name</span>: <span class="str">'Alice'</span>,
+    <span class="attr">age</span>: <span class="num">28</span>,
+    <span class="attr">email</span>: <span class="str">'alice@example.com'</span>
+  });
+
+  <span class="kw">const</span> [hobbies, <span class="fn">setHobbies</span>] = <span class="fn">useState</span>([<span class="str">'coding'</span>, <span class="str">'hiking'</span>]);
+
+  <span class="cmt">// ❌ WRONG — direct mutation, React won't detect change!</span>
+  <span class="kw">const</span> <span class="fn">badUpdate</span> = () => {
+    user.name = <span class="str">'Bob'</span>;   <span class="cmt">// Mutates existing object</span>
+    <span class="fn">setUser</span>(user);        <span class="cmt">// Same reference = React ignores it</span>
+  };
+
+  <span class="cmt">// ✅ CORRECT — spread creates a new object with changes</span>
+  <span class="kw">const</span> <span class="fn">updateName</span> = () => {
+    <span class="fn">setUser</span>({ ...user, <span class="attr">name</span>: <span class="str">'Bob'</span> });
+    <span class="cmt">// ...user copies all existing properties</span>
+    <span class="cmt">// name: 'Bob' then overrides just the name</span>
+  };
+
+  <span class="cmt">// ✅ CORRECT — adding to an array</span>
+  <span class="kw">const</span> <span class="fn">addHobby</span> = () => {
+    <span class="fn">setHobbies</span>([...hobbies, <span class="str">'painting'</span>]);
+    <span class="cmt">// Spread existing + add new item at end</span>
+  };
+
+  <span class="cmt">// ✅ CORRECT — removing from array</span>
+  <span class="kw">const</span> <span class="fn">removeHobby</span> = (<span class="fn">hobbyToRemove</span>) => {
+    <span class="fn">setHobbies</span>(hobbies.<span class="fn">filter</span>(h => h !== hobbyToRemove));
+    <span class="cmt">// .filter creates a NEW array without the removed item</span>
+  };
+}</pre></div>
+  </div>
+
+  <h3>The Functional Update Pattern</h3>
+  <p>When new state depends on old state, <strong>always use the functional form</strong> of the setter. This is critical when multiple state updates happen in quick succession:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">Functional Updates — Critical Pattern</span>
+    </div>
+    <div class="code-body"><pre><span class="kw">const</span> [count, <span class="fn">setCount</span>] = <span class="fn">useState</span>(<span class="num">0</span>);
+
+<span class="cmt">// ❌ RISKY — may use a stale count value</span>
+<span class="kw">const</span> <span class="fn">badIncrement</span> = () => <span class="fn">setCount</span>(count + <span class="num">1</span>);
+
+<span class="cmt">// ✅ SAFE — prev is ALWAYS the latest value</span>
+<span class="cmt">// React passes you the actual current state as "prev"</span>
+<span class="kw">const</span> <span class="fn">safeIncrement</span> = () => <span class="fn">setCount</span>(prev => prev + <span class="num">1</span>);
+
+<span class="cmt">// This matters when you call setCount multiple times fast:</span>
+<span class="kw">const</span> <span class="fn">tripleIncrement</span> = () => {
+  <span class="fn">setCount</span>(prev => prev + <span class="num">1</span>);  <span class="cmt">// prev = 0, returns 1</span>
+  <span class="fn">setCount</span>(prev => prev + <span class="num">1</span>);  <span class="cmt">// prev = 1, returns 2</span>
+  <span class="fn">setCount</span>(prev => prev + <span class="num">1</span>);  <span class="cmt">// prev = 2, returns 3</span>
+  <span class="cmt">// Result: count = 3 ✅ (correct!)</span>
+
+  <span class="cmt">// vs the BAD way:</span>
+  <span class="fn">setCount</span>(count + <span class="num">1</span>);  <span class="cmt">// count is 0, sets to 1</span>
+  <span class="fn">setCount</span>(count + <span class="num">1</span>);  <span class="cmt">// count is STILL 0, sets to 1 again</span>
+  <span class="fn">setCount</span>(count + <span class="num">1</span>);  <span class="cmt">// count is STILL 0, sets to 1 again!</span>
+  <span class="cmt">// Result: count = 1 ❌ (wrong!)</span>
+};</pre></div>
+  </div>
+
+  <h3>Lifting State Up — Sharing Between Components</h3>
+  <p>When two sibling components need to share the same state, you <strong>lift the state up</strong> to their common parent. The parent owns the state and passes it down as props:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-filename">Lifting State Up Pattern</span>
+    </div>
+    <div class="code-body"><pre><span class="cmt">// Parent owns the state — it's the single source of truth</span>
+<span class="kw">function</span> <span class="fn">TemperatureApp</span>() {
+  <span class="kw">const</span> [celsius, <span class="fn">setCelsius</span>] = <span class="fn">useState</span>(<span class="num">0</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      <span class="cmt">{/* Both children get state + the setter function */}</span>
+      &lt;<span class="tag">CelsiusInput</span>
+        <span class="attr">value</span>=<span class="val">{celsius}</span>
+        <span class="attr">onChange</span>=<span class="val">{setCelsius}</span>
+      /&gt;
+      &lt;<span class="tag">FahrenheitDisplay</span>
+        <span class="attr">value</span>=<span class="val">{celsius * 9/5 + 32}</span>
+      /&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="cmt">// Child 1 — can change state via the onChange prop</span>
+<span class="kw">function</span> <span class="fn">CelsiusInput</span>({ <span class="fn">value</span>, <span class="fn">onChange</span> }) {
+  <span class="kw">return</span> &lt;<span class="tag">input</span> <span class="attr">value</span>=<span class="val">{value}</span> <span class="attr">onChange</span>=<span class="val">{e => onChange(Number(e.target.value))}</span> /&gt;;
+}
+
+<span class="cmt">// Child 2 — reads derived state, doesn't modify anything</span>
+<span class="kw">function</span> <span class="fn">FahrenheitDisplay</span>({ <span class="fn">value</span> }) {
+  <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;{value}°F&lt;/<span class="tag">p</span>&gt;;
+}
+<span class="cmt">// When CelsiusInput changes, Parent re-renders,
+// FahrenheitDisplay automatically shows the updated conversion!</span></pre></div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">State Summary — The 5 Rules</div>
+    <p style="margin:0; font-size:14.5px; line-height:1.9;">
+      <strong>1. Never mutate state directly</strong> — always use the setter function<br>
+      <strong>2. Objects/arrays need new copies</strong> — use spread <code>{ ...obj }</code> or <code>[...arr]</code><br>
+      <strong>3. Use functional updates</strong> when new state depends on old state<br>
+      <strong>4. State is local by default</strong> — lift up to share between siblings<br>
+      <strong>5. State updates may be batched</strong> — React can group multiple setters into one re-render for performance
+    </p>
+  </div>
+
+  <div class="separator">Beyond useState</div>
+
+  <h3>When to Use More Advanced State</h3>
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-icon blue">🔄</div>
+      <h4>useReducer</h4>
+      <p>When you have complex state logic with multiple sub-values, or when next state depends on previous. Think of it as a more structured <code>useState</code>.</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon gold">🌐</div>
+      <h4>Context API</h4>
+      <p>When deeply nested components need the same state and prop-drilling becomes impractical. Global state for small-to-medium apps.</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon red">🏗️</div>
+      <h4>Redux / Zustand</h4>
+      <p>For large applications with complex, globally shared state across many components. External state management libraries.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p style="font-size:18px; font-family:'Instrument Serif',serif; font-style:italic; color:var(--ink); margin-bottom:1rem;">You now understand React from the ground up.</p>
+  React.js Deep Dive — Built with ⚛ and obsessive attention to detail
+</footer>
+
+<script>
+  // Active nav link on scroll
+  const sections = document.querySelectorAll('section[id], #hero');
+  const navLinks = document.querySelectorAll('nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('section[id], #hero').forEach(el => observer.observe(el));
+
+  // Animate sections on scroll
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+      }
+    });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('section').forEach(el => {
+    el.style.animationPlayState = 'paused';
+    sectionObserver.observe(el);
+  });
+</script>
+</body>
+</html>

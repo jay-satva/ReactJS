@@ -1,0 +1,41 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #111318;
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 28px 32px;
+  background-color: #111318;
+}
+
+.content h2 {
+  color: #e2e8f0;
+  font-family: 'Courier New', monospace;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+}
+
+.dashboard-subtitle {
+  color: #4a5568;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  margin-top: 4px;
+}

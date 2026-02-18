@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>map · filter · reduce — The Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #f0ede6;
+    --ink:      #1a1714;
+    --muted:    #8a8479;
+    --border:   #ddd9d0;
+    --card:     #faf8f4;
+
+    --map-hue:    #2563eb;
+    --map-light:  #eff6ff;
+    --map-border: #bfdbfe;
+
+    --filter-hue:    #16a34a;
+    --filter-light:  #f0fdf4;
+    --filter-border: #bbf7d0;
+
+    --reduce-hue:    #dc2626;
+    --reduce-light:  #fef2f2;
+    --reduce-border: #fecaca;
+
+    --code-bg:     #17191f;
+    --code-border: #2d3044;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Figtree', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.75;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 99;
+    background: rgba(240,237,230,0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0;
+    padding: 0 2rem; height: 52px;
+    overflow-x: auto;
+  }
+  nav a {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    text-decoration: none; color: var(--muted);
+    padding: 0 1rem; height: 52px;
+    display: flex; align-items: center;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  nav a.map-link:hover    { color: var(--map-hue);    border-color: var(--map-hue); }
+  nav a.filter-link:hover { color: var(--filter-hue); border-color: var(--filter-hue); }
+  nav a.reduce-link:hover { color: var(--reduce-hue); border-color: var(--reduce-hue); }
+  nav a.nav-logo {
+    font-size: 13px; color: var(--ink);
+    margin-right: 1rem; padding-right: 1.5rem;
+    border-right: 1px solid var(--border);
+    font-weight: 800; letter-spacing: 0.02em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 7rem 6vw 5rem;
+    border-bottom: 1px solid var(--border);
+    max-width: 1100px; margin: 0 auto;
+  }
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: .75rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; display: block;
+    width: 28px; height: 1px; background: var(--muted);
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 1.0; letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 .m { color: var(--map-hue); }
+  .hero h1 .f { color: var(--filter-hue); }
+  .hero h1 .r { color: var(--reduce-hue); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--muted);
+    max-width: 560px; line-height: 1.7;
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── QUICK COMPARE TABLE ── */
+  .compare-table {
+    width: 100%; border-collapse: collapse;
+    border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    background: var(--card);
+    font-size: 14.5px;
+  }
+  .compare-table th {
+    padding: 12px 16px; text-align: left;
+    font-weight: 700; font-family: 'DM Mono', monospace;
+    font-size: 12px; letter-spacing: 0.05em;
+    text-transform: uppercase; background: var(--border);
+    color: var(--muted);
+  }
+  .compare-table td {
+    padding: 13px 16px;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare-table tr td:first-child {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500; font-size: 14px;
+  }
+  .map-row td:first-child    { color: var(--map-hue); }
+  .filter-row td:first-child { color: var(--filter-hue); }
+  .reduce-row td:first-child { color: var(--reduce-hue); }
+  .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    padding: 2px 8px; border-radius: 4px;
+    border: 1px solid currentColor;
+  }
+  .tag-map    { color: var(--map-hue);    background: var(--map-light); }
+  .tag-filter { color: var(--filter-hue); background: var(--filter-light); }
+  .tag-reduce { color: var(--reduce-hue); background: var(--reduce-light); }
+
+  /* ── SECTIONS ── */
+  .method-section {
+    padding: 6rem 6vw;
+    border-bottom: 1px solid var(--border);
+    max-width: 1100px; margin: 0 auto;
+    animation: fadeUp .5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .method-header {
+    display: flex; align-items: flex-start;
+    gap: 2rem; margin-bottom: 3rem;
+    flex-wrap: wrap;
+  }
+  .method-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 100px; line-height: 1;
+    font-style: italic; opacity: 0.08;
+    color: var(--ink); user-select: none;
+    flex-shrink: 0;
+  }
+  .method-title-block { flex: 1; }
+
+  .method-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: .75rem; display: flex;
+    align-items: center; gap: .6rem;
+  }
+  .method-label::before {
+    content: ''; display: block;
+    width: 20px; height: 2px;
+  }
+  .map-label    { color: var(--map-hue); }
+  .map-label::before    { background: var(--map-hue); }
+  .filter-label { color: var(--filter-hue); }
+  .filter-label::before { background: var(--filter-hue); }
+  .reduce-label { color: var(--reduce-hue); }
+  .reduce-label::before { background: var(--reduce-hue); }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 4vw, 58px);
+    line-height: 1.05; letter-spacing: -0.02em;
+    margin-bottom: .75rem;
+  }
+  .method-tagline {
+    font-size: 1rem; color: var(--muted); font-style: italic;
+  }
+
+  h3 {
+    font-family: 'Figtree', sans-serif;
+    font-size: 18px; font-weight: 700;
+    margin: 2.5rem 0 .75rem;
+  }
+  p { margin-bottom: 1.1rem; color: #2e2a25; }
+
+  /* ── VISUAL DIAGRAMS ── */
+  .diagram {
+    border-radius: 12px; padding: 2rem;
+    margin: 2rem 0; text-align: center;
+  }
+  .diagram-map    { background: var(--map-light);    border: 1px solid var(--map-border); }
+  .diagram-filter { background: var(--filter-light); border: 1px solid var(--filter-border); }
+  .diagram-reduce { background: var(--reduce-light); border: 1px solid var(--reduce-border); }
+
+  .diagram-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 1.25rem; color: var(--muted);
+  }
+
+  .array-visual {
+    display: flex; align-items: center;
+    justify-content: center; gap: .5rem;
+    flex-wrap: wrap;
+  }
+  .arr-item {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px; font-weight: 500;
+  }
+  .arr-map    { background: var(--map-hue);    color: white; }
+  .arr-filter { background: var(--filter-hue); color: white; }
+  .arr-reduce { background: var(--reduce-hue); color: white; }
+  .arr-faded  { background: rgba(0,0,0,0.08);  color: var(--muted); }
+  .arr-out    { background: white; border: 1.5px solid currentColor; }
+  .arr-out.map-out    { color: var(--map-hue); }
+  .arr-out.filter-out { color: var(--filter-hue); }
+  .arr-out.reduce-out { color: var(--reduce-hue); }
+
+  .diagram-arrow {
+    font-size: 22px; color: var(--muted);
+    margin: .75rem 0;
+  }
+  .diagram-fn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--muted);
+    margin: .5rem 0;
+    background: rgba(255,255,255,0.6);
+    padding: 4px 12px; border-radius: 20px;
+    display: inline-block;
+  }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 12px; overflow: hidden;
+    margin: 1.75rem 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 13.5px; line-height: 1.7;
+  }
+  .code-header {
+    background: #1f2230;
+    padding: 9px 18px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--code-border);
+  }
+  .dots { display: flex; gap: 6px; }
+  .dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .dots span:nth-child(1) { background: #ff5f57; }
+  .dots span:nth-child(2) { background: #ffbd2e; }
+  .dots span:nth-child(3) { background: #28c840; }
+  .code-fname {
+    font-size: 11px; color: #5a6080; font-weight: 500;
+    letter-spacing: .04em;
+  }
+  .code-body {
+    padding: 1.4rem 1.75rem;
+    overflow-x: auto; color: #cdd6f4;
+  }
+  .code-body pre { white-space: pre; }
+
+  /* syntax colors */
+  .kw  { color: #cba6f7; }
+  .fn  { color: #89b4fa; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #45475a; font-style: italic; }
+  .tag { color: #f38ba8; }
+  .atr { color: #f9e2af; }
+  .hl  {
+    display: block; margin: 0 -1.75rem;
+    padding: 0 1.75rem;
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid #f9e2af;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    padding: 1.25rem 1.75rem; margin: 1.75rem 0;
+    border-radius: 0 10px 10px 0;
+    border-left: 3px solid;
+  }
+  .callout-map    { border-color: var(--map-hue);    background: var(--map-light); }
+  .callout-filter { border-color: var(--filter-hue); background: var(--filter-light); }
+  .callout-reduce { border-color: var(--reduce-hue); background: var(--reduce-light); }
+  .callout-neutral{ border-color: var(--muted); background: rgba(0,0,0,0.03); }
+
+  .callout-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: .4rem;
+  }
+  .ct-map    { color: var(--map-hue); }
+  .ct-filter { color: var(--filter-hue); }
+  .ct-reduce { color: var(--reduce-hue); }
+  .callout p { margin: 0; font-size: 14.5px; }
+
+  /* ── TWO COL ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem; margin: 1.5rem 0;
+    align-items: start;
+  }
+  @media (max-width: 740px) {
+    .two-col { grid-template-columns: 1fr; }
+    h2 { font-size: 36px; }
+  }
+
+  /* ── WHEN TO USE BOX ── */
+  .when-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin: 2.5rem 0;
+  }
+  @media (max-width: 740px) { .when-grid { grid-template-columns: 1fr; } }
+
+  .when-card {
+    border-radius: 12px; padding: 1.75rem;
+    border: 1px solid; position: relative;
+  }
+  .when-card.map-card    { background: var(--map-light);    border-color: var(--map-border); }
+  .when-card.filter-card { background: var(--filter-light); border-color: var(--filter-border); }
+  .when-card.reduce-card { background: var(--reduce-light); border-color: var(--reduce-border); }
+
+  .when-card-method {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px; font-weight: 500;
+    margin-bottom: .5rem;
+  }
+  .map-card    .when-card-method { color: var(--map-hue); }
+  .filter-card .when-card-method { color: var(--filter-hue); }
+  .reduce-card .when-card-method { color: var(--reduce-hue); }
+
+  .when-card h4 {
+    font-size: 14px; font-weight: 700;
+    margin-bottom: .5rem; color: var(--ink);
+  }
+  .when-card ul {
+    padding-left: 1.2rem; font-size: 13.5px;
+    color: #3a3630; line-height: 1.8;
+  }
+
+  /* ── CHAINING SECTION ── */
+  .chain-visual {
+    display: flex; align-items: center;
+    flex-wrap: wrap; gap: .5rem;
+    margin: 1.5rem 0; padding: 1.5rem 2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .chain-box {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px; font-weight: 500;
+    padding: 6px 14px; border-radius: 6px;
+  }
+  .chain-arr  { background: var(--ink);    color: white; }
+  .chain-map  { background: var(--map-hue);    color: white; }
+  .chain-filt { background: var(--filter-hue); color: white; }
+  .chain-red  { background: var(--reduce-hue); color: white; }
+  .chain-res  { background: white; border: 1.5px solid var(--border); color: var(--ink); }
+  .chain-dot  { font-size: 18px; color: var(--muted); }
+
+  /* ── RETURN VALUE BADGES ── */
+  .return-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    font-weight: 500; padding: 5px 12px;
+    border-radius: 6px; border: 1px solid;
+    margin: .25rem;
+  }
+  .rb-map    { color: var(--map-hue);    background: var(--map-light);    border-color: var(--map-border); }
+  .rb-filter { color: var(--filter-hue); background: var(--filter-light); border-color: var(--filter-border); }
+  .rb-reduce { color: var(--reduce-hue); background: var(--reduce-light); border-color: var(--reduce-border); }
+
+  /* ── BIG QUOTE ── */
+  .big-quote {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(20px, 2.8vw, 32px);
+    font-style: italic; line-height: 1.4;
+    border-left: 3px solid var(--border);
+    padding-left: 1.5rem; margin: 2.5rem 0;
+    color: var(--ink);
+  }
+
+  /* ── SEPARATOR ── */
+  .sep {
+    display: flex; align-items: center;
+    gap: 1rem; margin: 2.5rem 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sep::before, .sep::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--border);
+  }
+
+  code {
+    font-family: 'DM Mono', monospace; font-size: .85em;
+    background: rgba(0,0,0,.06); padding: 2px 6px;
+    border-radius: 4px; color: #5a3e28;
+  }
+
+  footer {
+    padding: 3rem 6vw; border-top: 1px solid var(--border);
+    text-align: center;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    color: var(--muted); letter-spacing: .06em;
+    max-width: 1100px; margin: 0 auto;
+  }
+
+  section[id] { scroll-margin-top: 52px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">JS Arrays</a>
+  <a href="#map"    class="map-link">.map()</a>
+  <a href="#filter" class="filter-link">.filter()</a>
+  <a href="#reduce" class="reduce-link">.reduce()</a>
+  <a href="#compare" style="color:var(--muted)">Compare</a>
+  <a href="#chaining" style="color:var(--muted)">Chaining</a>
+  <a href="#react" style="color:var(--muted)">In React</a>
+</nav>
+
+<!-- HERO -->
+<div id="hero" style="max-width:1100px;margin:0 auto;">
+<div class="hero">
+  <div class="hero-eyebrow">JavaScript Array Methods</div>
+  <h1>
+    <span class="m">.map()</span><br>
+    <span class="f">.filter()</span><br>
+    <span class="r">.reduce()</span>
+  </h1>
+  <p class="hero-sub">Three methods. One array. Completely different jobs. Master these and you'll write cleaner, more powerful React code every single day.</p>
+
+  <!-- Quick Compare -->
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>What it does</th>
+        <th>Returns</th>
+        <th>Input → Output size</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="map-row">
+        <td>.map()</td>
+        <td>Transform every item</td>
+        <td><span class="tag tag-map">New Array</span> — same length</td>
+        <td>5 items → 5 items</td>
+      </tr>
+      <tr class="filter-row">
+        <td>.filter()</td>
+        <td>Keep only matching items</td>
+        <td><span class="tag tag-filter">New Array</span> — shorter or equal</td>
+        <td>5 items → 0–5 items</td>
+      </tr>
+      <tr class="reduce-row">
+        <td>.reduce()</td>
+        <td>Collapse array into one value</td>
+        <td><span class="tag tag-reduce">Anything</span> — number, string, object…</td>
+        <td>5 items → 1 value</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- ═══════════════════════════════ MAP ═══════════════════════════════ -->
+<div style="max-width:1100px;margin:0 auto;">
+<section id="map" class="method-section">
+  <div class="method-header">
+    <div class="method-num">1</div>
+    <div class="method-title-block">
+      <div class="method-label map-label">Array Method 01</div>
+      <h2>.map()</h2>
+      <p class="method-tagline">Transform everything. Touch nothing.</p>
+    </div>
+  </div>
+
+  <p><strong>.map() takes an array, runs a function on EVERY item, and gives you back a brand new array of the same length</strong> — but with each item transformed. The original array is never modified.</p>
+
+  <p>Think of it like a factory conveyor belt. Every item goes in, gets processed, and comes out the other end changed. Nothing is skipped, nothing is removed. One item in = one item out.</p>
+
+  <!-- VISUAL DIAGRAM -->
+  <div class="diagram diagram-map">
+    <div class="diagram-label">Visual — .map() transforms every item</div>
+    <div class="array-visual">
+      <div class="arr-item arr-map">1</div>
+      <div class="arr-item arr-map">2</div>
+      <div class="arr-item arr-map">3</div>
+      <div class="arr-item arr-map">4</div>
+      <div class="arr-item arr-map">5</div>
+    </div>
+    <div class="diagram-arrow">↓</div>
+    <div class="diagram-fn">x => x * 2</div>
+    <div class="diagram-arrow">↓</div>
+    <div class="array-visual">
+      <div class="arr-item arr-out map-out">2</div>
+      <div class="arr-item arr-out map-out">4</div>
+      <div class="arr-item arr-out map-out">6</div>
+      <div class="arr-item arr-out map-out">8</div>
+      <div class="arr-item arr-out map-out">10</div>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:.75rem;">5 items in → 5 items out. Same length, all transformed.</div>
+  </div>
+
+  <h3>Syntax</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">.map() — Anatomy</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> result = array.<span class="fn">map</span>((item, index, originalArray) => {
+  <span class="cmt">// item          → the current element being processed</span>
+  <span class="cmt">// index         → its position (0, 1, 2...) — optional</span>
+  <span class="cmt">// originalArray → the original array itself  — optional</span>
+  <span class="kw">return</span> <span class="cmt">/* transformed version of item */</span>;
+});</pre></div>
+  </div>
+
+  <h3>Simple Examples</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">map() Examples</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> numbers = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
+
+<span class="cmt">// Double every number</span>
+<span class="kw">const</span> doubled = numbers.<span class="fn">map</span>(n => n * <span class="num">2</span>);
+<span class="cmt">// → [2, 4, 6, 8, 10]</span>
+
+<span class="cmt">// Convert to strings</span>
+<span class="kw">const</span> asStrings = numbers.<span class="fn">map</span>(n => <span class="str">`Item #${n}`</span>);
+<span class="cmt">// → ["Item #1", "Item #2", "Item #3", "Item #4", "Item #5"]</span>
+
+<span class="cmt">// With objects — extract just one field</span>
+<span class="kw">const</span> users = [
+  { id: <span class="num">1</span>, name: <span class="str">'Alice'</span>, age: <span class="num">28</span> },
+  { id: <span class="num">2</span>, name: <span class="str">'Bob'</span>,   age: <span class="num">34</span> },
+  { id: <span class="num">3</span>, name: <span class="str">'Carol'</span>, age: <span class="num">22</span> },
+];
+
+<span class="kw">const</span> names = users.<span class="fn">map</span>(user => user.name);
+<span class="cmt">// → ["Alice", "Bob", "Carol"]</span>
+
+<span class="cmt">// Transform objects — add a new field to each</span>
+<span class="kw">const</span> withSenior = users.<span class="fn">map</span>(user => ({
+  ...user,
+  isSenior: user.age >= <span class="num">30</span>
+}));
+<span class="cmt">// → [{ id:1, name:'Alice', age:28, isSenior:false }, ...]</span></pre></div>
+  </div>
+
+  <h3>The Most Important Use of .map() in React</h3>
+  <p>In React, <strong>.map() is how you render lists</strong>. Whenever you have an array of data and want to render a component for each item, you use .map():</p>
+
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">.map() in React JSX — The Core Pattern</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> servers = [
+  { id: <span class="num">1</span>, name: <span class="str">'Database'</span>,   status: <span class="str">'Online'</span>  },
+  { id: <span class="num">2</span>, name: <span class="str">'Web Server'</span>, status: <span class="str">'Offline'</span> },
+  { id: <span class="num">3</span>, name: <span class="str">'Cache'</span>,       status: <span class="str">'Online'</span>  },
+];
+
+<span class="kw">function</span> <span class="fn">ServerList</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">ul</span>&gt;
+      {servers.<span class="fn">map</span>((server) => (
+        &lt;<span class="tag">StatusItem</span>
+          <span class="atr">key</span>={server.id}       <span class="cmt">{/* key is REQUIRED — helps React track items */}</span>
+          <span class="atr">name</span>={server.name}
+          <span class="atr">status</span>={server.status}
+        /&gt;
+      ))}
+    &lt;/<span class="tag">ul</span>&gt;
+  );
+}
+<span class="cmt">// Each server object → one &lt;StatusItem /&gt; component
+// 3 servers → 3 components rendered. Automatically.</span></pre></div>
+  </div>
+
+  <div class="callout callout-map">
+    <div class="callout-title ct-map">What .map() Returns</div>
+    <p><strong>Always a new array of the same length.</strong> Every item in the original array produces exactly one item in the result. If your array has 100 items, your result has 100 items. The original array is untouched.</p>
+  </div>
+
+  <div class="callout callout-neutral">
+    <div class="callout-title" style="color:var(--muted)">⚠️ The key prop</div>
+    <p>In React, when you use .map() to render a list, every element MUST have a unique <code>key</code> prop. React uses this to track which items changed, were added, or removed. Use a unique ID from your data — never use the index as key if the list can change order.</p>
+  </div>
+</section>
+</div>
+
+<!-- ═══════════════════════════════ FILTER ═══════════════════════════════ -->
+<div style="max-width:1100px;margin:0 auto;">
+<section id="filter" class="method-section">
+  <div class="method-header">
+    <div class="method-num">2</div>
+    <div class="method-title-block">
+      <div class="method-label filter-label">Array Method 02</div>
+      <h2>.filter()</h2>
+      <p class="method-tagline">Keep what passes. Discard what doesn't.</p>
+    </div>
+  </div>
+
+  <p><strong>.filter() tests every item against a condition. If the condition returns true, the item is kept. If false, it's removed.</strong> The result is a new array with only the items that passed the test.</p>
+
+  <p>Think of it like a bouncer at the door. Every item walks up. The bouncer checks the condition. Pass? You're in. Fail? You're out. The bouncer never changes you — just decides in or out.</p>
+
+  <!-- VISUAL DIAGRAM -->
+  <div class="diagram diagram-filter">
+    <div class="diagram-label">Visual — .filter() keeps only what passes the test</div>
+    <div class="array-visual">
+      <div class="arr-item arr-filter">12</div>
+      <div class="arr-item arr-faded">5</div>
+      <div class="arr-item arr-filter">18</div>
+      <div class="arr-item arr-faded">3</div>
+      <div class="arr-item arr-filter">25</div>
+    </div>
+    <div class="diagram-arrow">↓</div>
+    <div class="diagram-fn">x => x &gt; 10</div>
+    <div class="diagram-arrow">↓</div>
+    <div class="array-visual">
+      <div class="arr-item arr-out filter-out">12</div>
+      <div class="arr-item arr-out filter-out">18</div>
+      <div class="arr-item arr-out filter-out">25</div>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:.75rem;">5 items in → 3 items out. 2 failed the test and were removed.</div>
+  </div>
+
+  <h3>Syntax</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">.filter() — Anatomy</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> result = array.<span class="fn">filter</span>((item, index, originalArray) => {
+  <span class="cmt">// Must return true  → item is KEPT in the result</span>
+  <span class="cmt">// Must return false → item is REMOVED from the result</span>
+  <span class="kw">return</span> <span class="cmt">/* boolean condition */</span>;
+});</pre></div>
+  </div>
+
+  <h3>Simple Examples</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">filter() Examples</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> numbers = [<span class="num">1</span>, <span class="num">5</span>, <span class="num">12</span>, <span class="num">3</span>, <span class="num">18</span>, <span class="num">7</span>, <span class="num">25</span>];
+
+<span class="cmt">// Keep only numbers greater than 10</span>
+<span class="kw">const</span> big = numbers.<span class="fn">filter</span>(n => n > <span class="num">10</span>);
+<span class="cmt">// → [12, 18, 25]</span>
+
+<span class="cmt">// Keep only even numbers</span>
+<span class="kw">const</span> evens = numbers.<span class="fn">filter</span>(n => n % <span class="num">2</span> === <span class="num">0</span>);
+<span class="cmt">// → [12, 18]</span>
+
+<span class="cmt">// With objects — keep online servers</span>
+<span class="kw">const</span> servers = [
+  { id: <span class="num">1</span>, name: <span class="str">'Database'</span>,   status: <span class="str">'Online'</span>      },
+  { id: <span class="num">2</span>, name: <span class="str">'Auth Server'</span>, status: <span class="str">'Offline'</span>     },
+  { id: <span class="num">3</span>, name: <span class="str">'Cache'</span>,       status: <span class="str">'Online'</span>      },
+  { id: <span class="num">4</span>, name: <span class="str">'Proxy'</span>,       status: <span class="str">'Maintenance'</span> },
+];
+
+<span class="kw">const</span> onlineOnly = servers.<span class="fn">filter</span>(s => s.status === <span class="str">'Online'</span>);
+<span class="cmt">// → [{ id:1, name:'Database', ... }, { id:3, name:'Cache', ... }]</span>
+
+<span class="cmt">// Remove an item by ID (common React pattern!)</span>
+<span class="kw">const</span> withoutId2 = servers.<span class="fn">filter</span>(s => s.id !== <span class="num">2</span>);
+<span class="cmt">// → All servers EXCEPT the one with id:2</span>
+
+<span class="cmt">// Filter strings by search term</span>
+<span class="kw">const</span> fruits = [<span class="str">'apple'</span>, <span class="str">'apricot'</span>, <span class="str">'banana'</span>, <span class="str">'avocado'</span>];
+<span class="kw">const</span> aFruits = fruits.<span class="fn">filter</span>(f => f.<span class="fn">startsWith</span>(<span class="str">'a'</span>));
+<span class="cmt">// → ["apple", "apricot", "avocado"]</span></pre></div>
+  </div>
+
+  <h3>.filter() in React — Search, Delete, Tabs</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">.filter() in React — Real Patterns</span></div>
+    <div class="code-body"><pre><span class="kw">import</span> { <span class="fn">useState</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">ServerDashboard</span>() {
+  <span class="kw">const</span> [servers, <span class="fn">setServers</span>] = <span class="fn">useState</span>([
+    { id: <span class="num">1</span>, name: <span class="str">'Database'</span>, status: <span class="str">'Online'</span>  },
+    { id: <span class="num">2</span>, name: <span class="str">'Cache'</span>,    status: <span class="str">'Offline'</span> },
+    { id: <span class="num">3</span>, name: <span class="str">'Proxy'</span>,    status: <span class="str">'Online'</span>  },
+  ]);
+  <span class="kw">const</span> [tab, <span class="fn">setTab</span>] = <span class="fn">useState</span>(<span class="str">'All'</span>);
+  <span class="kw">const</span> [search, <span class="fn">setSearch</span>] = <span class="fn">useState</span>(<span class="str">''</span>);
+
+  <span class="cmt">// Pattern 1: Filter by tab</span>
+  <span class="kw">const</span> byTab = tab === <span class="str">'All'</span>
+    ? servers
+    : servers.<span class="fn">filter</span>(s => s.status === tab);
+
+  <span class="cmt">// Pattern 2: Filter by search input</span>
+  <span class="kw">const</span> visible = byTab.<span class="fn">filter</span>(s =>
+    s.name.<span class="fn">toLowerCase</span>().<span class="fn">includes</span>(search.<span class="fn">toLowerCase</span>())
+  );
+
+  <span class="cmt">// Pattern 3: Delete item from state (immutably!)</span>
+  <span class="kw">const</span> <span class="fn">deleteServer</span> = (id) => {
+    <span class="fn">setServers</span>(prev => prev.<span class="fn">filter</span>(s => s.id !== id));
+    <span class="cmt">// Creates new array WITHOUT the deleted item</span>
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">input</span> <span class="atr">value</span>={search} <span class="atr">onChange</span>={e => <span class="fn">setSearch</span>(e.target.value)} /&gt;
+      {visible.<span class="fn">map</span>(s => &lt;<span class="tag">ServerCard</span> <span class="atr">key</span>={s.id} {...s} <span class="atr">onDelete</span>={<span class="fn">deleteServer</span>} /&gt;)}
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre></div>
+  </div>
+
+  <div class="callout callout-filter">
+    <div class="callout-title ct-filter">What .filter() Returns</div>
+    <p><strong>Always a new array — but potentially shorter.</strong> If no items pass the test, you get an empty array <code>[]</code>. If all items pass, you get a copy of the whole array. The original is never changed. Items are never modified — only included or excluded.</p>
+  </div>
+</section>
+</div>
+
+<!-- ═══════════════════════════════ REDUCE ═══════════════════════════════ -->
+<div style="max-width:1100px;margin:0 auto;">
+<section id="reduce" class="method-section">
+  <div class="method-header">
+    <div class="method-num">3</div>
+    <div class="method-title-block">
+      <div class="method-label reduce-label">Array Method 03</div>
+      <h2>.reduce()</h2>
+      <p class="method-tagline">Many items. One answer.</p>
+    </div>
+  </div>
+
+  <p><strong>.reduce() is the most powerful and most misunderstood of the three.</strong> It processes every item in an array and accumulates them into a single output value. That value can be a number, string, object, array — literally anything.</p>
+
+  <p>Think of reduce like a snowball rolling down a hill. It starts small (the initial value), picks up snow (each array item) as it rolls, and by the time it reaches the bottom it's become one big ball (the final result).</p>
+
+  <!-- VISUAL DIAGRAM -->
+  <div class="diagram diagram-reduce">
+    <div class="diagram-label">Visual — .reduce() accumulates items into one value (summing)</div>
+    <div class="array-visual">
+      <div class="arr-item arr-reduce">10</div>
+      <div class="arr-item arr-reduce">20</div>
+      <div class="arr-item arr-reduce">30</div>
+      <div class="arr-item arr-reduce">40</div>
+    </div>
+    <div class="diagram-arrow">↓</div>
+    <div class="diagram-fn">(acc, item) => acc + item &nbsp;|&nbsp; start: 0</div>
+    <div class="diagram-arrow">↓</div>
+    <div class="array-visual">
+      <div class="arr-item arr-out reduce-out" style="width:auto;padding:0 16px;">100</div>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:.75rem;">4 items in → 1 value out. The entire array collapsed into a single number.</div>
+  </div>
+
+  <h3>Syntax — The Key to Understanding reduce()</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">.reduce() — Anatomy</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> result = array.<span class="fn">reduce</span>((accumulator, item, index, originalArray) => {
+  <span class="cmt">// accumulator → the "running total" / result so far</span>
+  <span class="cmt">// item        → the current element being processed</span>
+  <span class="cmt">// index       → current position (optional)</span>
+  <span class="cmt">// The value you RETURN becomes the next accumulator</span>
+  <span class="kw">return</span> <span class="cmt">/* updated accumulator */</span>;
+}, initialValue);
+<span class="cmt">// initialValue → what accumulator starts as (0, '', [], {}, etc.)</span></pre></div>
+  </div>
+
+  <h3>Step-by-Step Trace — How reduce() actually runs</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">Tracing reduce() execution step by step</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> numbers = [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>];
+
+<span class="kw">const</span> total = numbers.<span class="fn">reduce</span>((acc, item) => acc + item, <span class="num">0</span>);
+
+<span class="cmt">// Step 0: acc = 0  (initialValue),  item = 10  →  returns 0  + 10 = 10</span>
+<span class="cmt">// Step 1: acc = 10,                 item = 20  →  returns 10 + 20 = 30</span>
+<span class="cmt">// Step 2: acc = 30,                 item = 30  →  returns 30 + 30 = 60</span>
+<span class="cmt">// Step 3: acc = 60,                 item = 40  →  returns 60 + 40 = 100</span>
+<span class="cmt">// No more items. Final acc = 100. That's what reduce returns.</span>
+
+console.<span class="fn">log</span>(total); <span class="cmt">// 100</span></pre></div>
+  </div>
+
+  <h3>reduce() can do anything</h3>
+  <div class="two-col">
+    <div>
+      <div class="code-block">
+        <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">Sum & Product</span></div>
+        <div class="code-body"><pre><span class="kw">const</span> nums = [<span class="num">5</span>, <span class="num">10</span>, <span class="num">15</span>, <span class="num">20</span>];
+
+<span class="cmt">// Sum all numbers</span>
+<span class="kw">const</span> sum = nums.<span class="fn">reduce</span>(
+  (acc, n) => acc + n, <span class="num">0</span>
+);
+<span class="cmt">// → 50</span>
+
+<span class="cmt">// Find maximum</span>
+<span class="kw">const</span> max = nums.<span class="fn">reduce</span>(
+  (acc, n) => n > acc ? n : acc, <span class="num">0</span>
+);
+<span class="cmt">// → 20</span>
+
+<span class="cmt">// Count occurrences</span>
+<span class="kw">const</span> words = [<span class="str">'a'</span>, <span class="str">'b'</span>, <span class="str">'a'</span>, <span class="str">'c'</span>, <span class="str">'a'</span>];
+<span class="kw">const</span> count = words.<span class="fn">reduce</span>((acc, w) => {
+  acc[w] = (acc[w] || <span class="num">0</span>) + <span class="num">1</span>;
+  <span class="kw">return</span> acc;
+}, {});
+<span class="cmt">// → { a:3, b:1, c:1 }</span></pre></div>
+      </div>
+    </div>
+    <div>
+      <div class="code-block">
+        <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">Build Objects & Flatten</span></div>
+        <div class="code-body"><pre><span class="cmt">// Build a lookup object from array</span>
+<span class="kw">const</span> users = [
+  { id: <span class="num">1</span>, name: <span class="str">'Alice'</span> },
+  { id: <span class="num">2</span>, name: <span class="str">'Bob'</span>   },
+];
+<span class="kw">const</span> byId = users.<span class="fn">reduce</span>((acc, user) => {
+  acc[user.id] = user;
+  <span class="kw">return</span> acc;
+}, {});
+<span class="cmt">// → { 1: {id:1,name:'Alice'}, 2: ... }</span>
+<span class="cmt">// Now: byId[1].name → 'Alice' instantly!</span>
+
+<span class="cmt">// Flatten nested arrays</span>
+<span class="kw">const</span> nested = [[<span class="num">1</span>,<span class="num">2</span>], [<span class="num">3</span>,<span class="num">4</span>], [<span class="num">5</span>]];
+<span class="kw">const</span> flat = nested.<span class="fn">reduce</span>(
+  (acc, arr) => [...acc, ...arr], []
+);
+<span class="cmt">// → [1, 2, 3, 4, 5]</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>.reduce() in React</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">.reduce() in React — Practical Uses</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> servers = [
+  { id: <span class="num">1</span>, name: <span class="str">'Database'</span>, status: <span class="str">'Online'</span>,  requests: <span class="num">120</span> },
+  { id: <span class="num">2</span>, name: <span class="str">'Cache'</span>,    status: <span class="str">'Online'</span>,  requests: <span class="num">80</span>  },
+  { id: <span class="num">3</span>, name: <span class="str">'Proxy'</span>,    status: <span class="str">'Offline'</span>, requests: <span class="num">0</span>   },
+];
+
+<span class="cmt">// Total requests across ALL servers</span>
+<span class="kw">const</span> totalRequests = servers.<span class="fn">reduce</span>(
+  (acc, s) => acc + s.requests, <span class="num">0</span>
+);
+<span class="cmt">// → 200</span>
+
+<span class="cmt">// Group servers by status</span>
+<span class="kw">const</span> grouped = servers.<span class="fn">reduce</span>((acc, s) => {
+  <span class="kw">if</span> (!acc[s.status]) acc[s.status] = [];
+  acc[s.status].<span class="fn">push</span>(s);
+  <span class="kw">return</span> acc;
+}, {});
+<span class="cmt">// → { Online: [Database, Cache], Offline: [Proxy] }</span>
+
+<span class="cmt">// Use in JSX for summary stats</span>
+<span class="kw">function</span> <span class="fn">Dashboard</span>({ servers }) {
+  <span class="kw">const</span> stats = servers.<span class="fn">reduce</span>((acc, s) => ({
+    total:    acc.total + <span class="num">1</span>,
+    online:   acc.online   + (s.status === <span class="str">'Online'</span>  ? <span class="num">1</span> : <span class="num">0</span>),
+    requests: acc.requests + s.requests,
+  }), { total: <span class="num">0</span>, online: <span class="num">0</span>, requests: <span class="num">0</span> });
+
+  <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;{stats.online} / {stats.total} online · {stats.requests} req/s&lt;/<span class="tag">p</span>&gt;;
+}</pre></div>
+  </div>
+
+  <div class="callout callout-reduce">
+    <div class="callout-title ct-reduce">What .reduce() Returns</div>
+    <p><strong>Whatever the accumulator is at the end.</strong> It's completely up to you — a number, string, boolean, object, array, anything. That's what makes reduce so powerful and flexible. You define the shape of the output by setting the initialValue and what you return each step.</p>
+  </div>
+</section>
+</div>
+
+<!-- ═══════════════════════════════ COMPARE ═══════════════════════════════ -->
+<div style="max-width:1100px;margin:0 auto;">
+<section id="compare" class="method-section">
+  <div class="method-label" style="color:var(--muted);display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem;">
+    <span style="display:block;width:20px;height:2px;background:var(--muted)"></span>
+    When to Use What
+  </div>
+  <h2>The Decision<br><em style="font-family:'DM Serif Display',serif;font-style:italic">Guide</em></h2>
+
+  <div class="big-quote">"Ask yourself: do I want to <span style="color:var(--map-hue)">transform</span> it, <span style="color:var(--filter-hue)">trim</span> it, or <span style="color:var(--reduce-hue)">total</span> it?"</div>
+
+  <div class="when-grid">
+    <div class="when-card map-card">
+      <div class="when-card-method">.map()</div>
+      <h4>Use when you want to:</h4>
+      <ul>
+        <li>Render a list of components</li>
+        <li>Transform every item</li>
+        <li>Extract a field from objects</li>
+        <li>Add a property to each object</li>
+        <li>Convert types (number → string)</li>
+        <li>Apply formatting to all items</li>
+      </ul>
+    </div>
+    <div class="when-card filter-card">
+      <div class="when-card-method">.filter()</div>
+      <h4>Use when you want to:</h4>
+      <ul>
+        <li>Remove items from a list</li>
+        <li>Implement search / filtering UI</li>
+        <li>Show only "Online" servers</li>
+        <li>Delete an item from state</li>
+        <li>Show items matching a category</li>
+        <li>Remove duplicates or nulls</li>
+      </ul>
+    </div>
+    <div class="when-card reduce-card">
+      <div class="when-card-method">.reduce()</div>
+      <h4>Use when you want to:</h4>
+      <ul>
+        <li>Sum / average numbers</li>
+        <li>Count items by category</li>
+        <li>Build an object from an array</li>
+        <li>Group items (by status, type…)</li>
+        <li>Flatten nested arrays</li>
+        <li>Compute multiple stats at once</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sep">Key Differences</div>
+
+  <h3>The "Does it change the array length?" test</h3>
+  <table class="compare-table" style="margin-top:1rem;">
+    <thead>
+      <tr>
+        <th>Question</th>
+        <th>Answer</th>
+        <th>Use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Do I want the SAME number of items, but different?</td>
+        <td>Yes, just transformed</td>
+        <td><span class="tag tag-map">.map()</span></td>
+      </tr>
+      <tr>
+        <td>Do I want FEWER items based on a condition?</td>
+        <td>Yes, some removed</td>
+        <td><span class="tag tag-filter">.filter()</span></td>
+      </tr>
+      <tr>
+        <td>Do I want ONE result from ALL the items?</td>
+        <td>Yes, collapsed to one value</td>
+        <td><span class="tag tag-reduce">.reduce()</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Return values side by side</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">Same array. Three methods. Three different outputs.</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> prices = [<span class="num">10</span>, <span class="num">25</span>, <span class="num">5</span>, <span class="num">40</span>, <span class="num">15</span>];
+
+<span class="cmt">// .map()   → New array, same length, every item changed</span>
+prices.<span class="fn">map</span>(p => p * <span class="num">1.1</span>);
+<span class="cmt">// → [11, 27.5, 5.5, 44, 16.5]  ← 5 items, all transformed</span>
+
+<span class="cmt">// .filter() → New array, fewer items, nothing changed about items</span>
+prices.<span class="fn">filter</span>(p => p > <span class="num">10</span>);
+<span class="cmt">// → [25, 40, 15]               ← 3 items, identical values</span>
+
+<span class="cmt">// .reduce() → Single value (not an array)</span>
+prices.<span class="fn">reduce</span>((acc, p) => acc + p, <span class="num">0</span>);
+<span class="cmt">// → 95                         ← one number, not an array at all</span></pre></div>
+  </div>
+</section>
+</div>
+
+<!-- ═══════════════════════════════ CHAINING ═══════════════════════════════ -->
+<div style="max-width:1100px;margin:0 auto;">
+<section id="chaining" class="method-section">
+  <div class="method-label" style="color:var(--muted);display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem;">
+    <span style="display:block;width:20px;height:2px;background:var(--muted)"></span>
+    Advanced Pattern
+  </div>
+  <h2>Chaining<br><em style="font-family:'DM Serif Display',serif;font-style:italic">Them Together</em></h2>
+
+  <p>Because .map() and .filter() both return arrays, you can chain them directly. Each method runs on the output of the previous. This is where real power unlocks.</p>
+
+  <div class="chain-visual">
+    <div class="chain-box chain-arr">array</div>
+    <div class="chain-dot">.</div>
+    <div class="chain-box chain-filt">filter()</div>
+    <div class="chain-dot">→ smaller array .</div>
+    <div class="chain-box chain-map">map()</div>
+    <div class="chain-dot">→ transformed array .</div>
+    <div class="chain-box chain-red">reduce()</div>
+    <div class="chain-dot">→</div>
+    <div class="chain-box chain-res">one value</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">Chaining — Real World Example</span></div>
+    <div class="code-body"><pre><span class="kw">const</span> servers = [
+  { id: <span class="num">1</span>, name: <span class="str">'Database'</span>, status: <span class="str">'Online'</span>,  requests: <span class="num">120</span>, memory: <span class="str">'70%'</span> },
+  { id: <span class="num">2</span>, name: <span class="str">'Cache'</span>,    status: <span class="str">'Offline'</span>, requests: <span class="num">0</span>,   memory: <span class="str">'10%'</span> },
+  { id: <span class="num">3</span>, name: <span class="str">'Proxy'</span>,    status: <span class="str">'Online'</span>,  requests: <span class="num">85</span>,  memory: <span class="str">'45%'</span> },
+  { id: <span class="num">4</span>, name: <span class="str">'Auth'</span>,     status: <span class="str">'Online'</span>,  requests: <span class="num">200</span>, memory: <span class="str">'80%'</span> },
+];
+
+<span class="cmt">// Goal: Get total requests from ONLINE servers only</span>
+<span class="kw">const</span> totalOnlineRequests = servers
+  .<span class="fn">filter</span>(s => s.status === <span class="str">'Online'</span>)   <span class="cmt">// Step 1: keep Online only [DB, Proxy, Auth]</span>
+  .<span class="fn">map</span>(s => s.requests)                   <span class="cmt">// Step 2: extract requests [120, 85, 200]</span>
+  .<span class="fn">reduce</span>((acc, r) => acc + r, <span class="num">0</span>);       <span class="cmt">// Step 3: sum them → 405</span>
+
+<span class="cmt">// In React JSX — filter first, THEN map to render</span>
+<span class="kw">function</span> <span class="fn">Dashboard</span>({ servers, showOnlyOnline }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      {servers
+        .<span class="fn">filter</span>(s => showOnlyOnline ? s.status === <span class="str">'Online'</span> : <span class="num">true</span>)
+        .<span class="fn">map</span>(s => &lt;<span class="tag">StatusItem</span> <span class="atr">key</span>={s.id} {...s} /&gt;)
+      }
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre></div>
+  </div>
+
+  <div class="callout callout-neutral">
+    <div class="callout-title" style="color:var(--muted)">Important Order Rule</div>
+    <p>Always <strong>.filter() before .map()</strong> when chaining. Filtering first reduces the number of items, so .map() has less work to do. Doing it the other way works but is wasteful — you'd transform items that then get thrown away.</p>
+  </div>
+</section>
+</div>
+
+<!-- ═══════════════════════════════ IN REACT ═══════════════════════════════ -->
+<div style="max-width:1100px;margin:0 auto;">
+<section id="react" class="method-section">
+  <div class="method-label" style="color:var(--muted);display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem;">
+    <span style="display:block;width:20px;height:2px;background:var(--muted)"></span>
+    In Your Project
+  </div>
+  <h2>Putting It All<br><em style="font-family:'DM Serif Display',serif;font-style:italic">Together</em></h2>
+
+  <p>Here's a complete, realistic example using all three methods in one React component — exactly the kind of code you'd write in your server dashboard:</p>
+
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><span></span><span></span><span></span></div><span class="code-fname">ServerDashboard.jsx — All Three Methods Working Together</span></div>
+    <div class="code-body"><pre><span class="kw">import</span> { <span class="fn">useState</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">ServerDashboard</span>() {
+  <span class="kw">const</span> [servers] = <span class="fn">useState</span>([
+    { id: <span class="num">1</span>, name: <span class="str">'Database'</span>, status: <span class="str">'Online'</span>,  requests: <span class="num">120</span> },
+    { id: <span class="num">2</span>, name: <span class="str">'Cache'</span>,    status: <span class="str">'Online'</span>,  requests: <span class="num">80</span>  },
+    { id: <span class="num">3</span>, name: <span class="str">'Proxy'</span>,    status: <span class="str">'Offline'</span>, requests: <span class="num">0</span>   },
+    { id: <span class="num">4</span>, name: <span class="str">'Auth'</span>,     status: <span class="str">'Online'</span>,  requests: <span class="num">200</span> },
+  ]);
+  <span class="kw">const</span> [filter, <span class="fn">setFilter</span>] = <span class="fn">useState</span>(<span class="str">'All'</span>);
+
+  <span class="cmt">// ── .filter() → Only show servers matching selected tab ──</span>
+  <span class="kw">const</span> visibleServers = servers.<span class="fn">filter</span>(s =>
+    filter === <span class="str">'All'</span> ? <span class="kw">true</span> : s.status === filter
+  );
+
+  <span class="cmt">// ── .reduce() → Summary stats from all servers ──────────</span>
+  <span class="kw">const</span> stats = servers.<span class="fn">reduce</span>((acc, s) => ({
+    totalRequests: acc.totalRequests + s.requests,
+    onlineCount:   acc.onlineCount + (s.status === <span class="str">'Online'</span> ? <span class="num">1</span> : <span class="num">0</span>),
+  }), { totalRequests: <span class="num">0</span>, onlineCount: <span class="num">0</span> });
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="cmt">{/* Stats bar — powered by .reduce() */}</span>&gt;
+      &lt;<span class="tag">p</span>&gt;{stats.onlineCount} online · {stats.totalRequests} total req/s&lt;/<span class="tag">p</span>&gt;
+
+      &lt;<span class="cmt">{/* Filter tabs — drives .filter() above */}</span>&gt;
+      {[<span class="str">'All'</span>, <span class="str">'Online'</span>, <span class="str">'Offline'</span>].<span class="fn">map</span>(tab => (    <span class="cmt">{/* .map() renders the tabs! */}</span>
+        &lt;<span class="tag">button</span> <span class="atr">key</span>={tab} <span class="atr">onClick</span>={() => <span class="fn">setFilter</span>(tab)}&gt;{tab}&lt;/<span class="tag">button</span>&gt;
+      ))}
+
+      &lt;<span class="cmt">{/* Server list — powered by .filter() + .map() */}</span>&gt;
+      {visibleServers.<span class="fn">map</span>(server => (           <span class="cmt">{/* .map() renders each card */}</span>
+        &lt;<span class="tag">StatusItem</span> <span class="atr">key</span>={server.id} {...server} /&gt;
+      ))}
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre></div>
+  </div>
+
+  <!-- Final summary -->
+  <div class="sep">One-Line Summaries</div>
+
+  <div style="display:flex;flex-direction:column;gap:1rem;margin:1.5rem 0;">
+    <div style="display:flex;align-items:center;gap:1.25rem;padding:1.25rem 1.5rem;background:var(--map-light);border:1px solid var(--map-border);border-radius:10px;">
+      <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--map-hue);min-width:90px;">.map()</span>
+      <span style="font-size:15px;color:#2e2a25;">"I want the <strong>same number of items</strong>, but each one <strong>transformed</strong> into something else."</span>
+      <span class="return-badge rb-map" style="margin-left:auto;white-space:nowrap;">→ Array (same length)</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:1.25rem;padding:1.25rem 1.5rem;background:var(--filter-light);border:1px solid var(--filter-border);border-radius:10px;">
+      <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--filter-hue);min-width:90px;">.filter()</span>
+      <span style="font-size:15px;color:#2e2a25;">"I want <strong>fewer items</strong> — only the ones that <strong>match my condition</strong>."</span>
+      <span class="return-badge rb-filter" style="margin-left:auto;white-space:nowrap;">→ Array (shorter)</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:1.25rem;padding:1.25rem 1.5rem;background:var(--reduce-light);border:1px solid var(--reduce-border);border-radius:10px;">
+      <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--reduce-hue);min-width:90px;">.reduce()</span>
+      <span style="font-size:15px;color:#2e2a25;">"I want to <strong>collapse the whole array</strong> into <strong>one single value</strong>."</span>
+      <span class="return-badge rb-reduce" style="margin-left:auto;white-space:nowrap;">→ Anything</span>
+    </div>
+  </div>
+
+</section>
+</div>
+
+<footer>
+  <p style="font-family:'DM Serif Display',serif;font-size:20px;font-style:italic;color:var(--ink);margin-bottom:.5rem;">None of them mutate the original array. Ever.</p>
+  map · filter · reduce — JavaScript Array Methods Complete Guide
+</footer>
+
+<script>
+  const links = document.querySelectorAll('nav a[href^="#"]');
+  const sections = document.querySelectorAll('section[id], #hero');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(a => a.style.color = '');
+        const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (a) a.style.color = 'var(--ink)';
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
