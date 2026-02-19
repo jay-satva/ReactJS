@@ -1,3 +1,4 @@
+import React from "react"
 function LiveNewsList({ posts, loading, error, onRefresh }) {
 
   if (loading) return <h2>Loading...</h2>
@@ -16,4 +17,4 @@ function LiveNewsList({ posts, loading, error, onRefresh }) {
   )
 }
 
-export default LiveNewsList
+export default React.memo(LiveNewsList)
