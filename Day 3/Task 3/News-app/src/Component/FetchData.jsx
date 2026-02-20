@@ -28,7 +28,7 @@ function FetchData() {
 
   useEffect(() => {
     fetchPosts()
-  }, [fetchPosts])
+  }, [])
 
   return (
     <LiveNewsList posts={posts} loading={loading} error={error} onRefresh={fetchPosts}/>

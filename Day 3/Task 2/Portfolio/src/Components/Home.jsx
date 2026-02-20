@@ -31,8 +31,10 @@ function Home() {
   const [state, dispatch] = useReducer(reducer, initialState)
   const navigate = useNavigate()
 
+  const filteredUsers = state.data.filter(user =>
+    user.name.toLowerCase().includes(state.query.toLowerCase())
+  )
   useEffect(() => {
-    if (!state.query) return
 
     const fetchUsers = async () => {
       dispatch({ type: "FETCH_START" })
@@ -40,18 +42,22 @@ function Home() {
       try {
         const response = await fetch(`https://jsonplaceholder.typicode.com/users?q=${state.query}`)
 
-        if (!response.ok) throw new Error("Failed to fetch users")
+        if (!response.ok){ 
+            console.error("ABCD");
+            throw new Error("Failed to fetch users")
+        }
         const data = await response.json()
-
         dispatch({ type: "FETCH_SUCCESS", payload: data })
-
       } catch (err) {
         dispatch({ type: "FETCH_ERROR", payload: err.message });
+      } finally 
+      {
+        console.error("Monika");
       }
     };
 
     fetchUsers()
-  }, [state.query])
+  }, [])
 
   return (
     <div style={{ padding: "20px" }}>
@@ -61,19 +67,15 @@ function Home() {
         type="text"
         placeholder="Search users..."
         value={state.query}
-        onChange={(e) =>
-          dispatch({ type: "SET_QUERY", payload: e.target.value })
-        }
+        onChange={(e) => dispatch({ type: "SET_QUERY", payload: e.target.value })}
       />
 
       {state.loading && <p>Loading...</p>}
       {state.error && (
-        <p style={{ color: "red" }}>
-          Error: {state.error}
-        </p>
+        <p style={{ color: "red" }}> Error: {state.error} </p>
       )}
 
-      {state.data.map((user) => (
+      {filteredUsers.map((user) => (
         <div
           key={user.id}
           style={{
@@ -82,7 +84,7 @@ function Home() {
             marginTop: "10px",
             cursor: "pointer"
           }}
-          onClick={() => navigate(`/user/${user.id}`)}
+          onClick={() => navigate(`/user/${user.id}`, {state: user})}
         >
           <h4>{user.name}</h4>
           <p>{user.email}</p>
@@ -92,4 +94,4 @@ function Home() {
   )
 }
 
-export default Home;
+export default Home
