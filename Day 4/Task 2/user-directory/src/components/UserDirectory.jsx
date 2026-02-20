@@ -35,6 +35,7 @@ function UserDirectory(){
       <Title level={3}>User Directory</Title>
       <Table dataSource={users} columns={columns} rowKey="id" bordered pagination={{ pageSize: 5 }}/>
     </div>
+    //the columns is used to display 'what fields to show from each row'
   )
 }
 
