@@ -9,19 +9,19 @@ const counterSlice = createSlice({
   initialState,
   reducers: {
     increment: (state) => {
-      state.value += 1, [...state.history, state.value]
+      state.history.push(state.value), state.value += 1
     },
     decrement: (state) => {
-      state.value -= 1, [...state.history, state.value]
+      state.history.push(state.value), state.value -= 1
     },
     reset: (state) => {
-        state.value = 0, [...state.history, state.value]
+      state.history.push(state.value), state.value = 0
     },
-    setValue: (state) => {
-        state.value = action.payload, [...state.history, state.value]
+    setValue: (state, action) => {
+        state.history.push(state.value), state.value = action.payload
     }
   },
 });
 
-export const { increment, decrement } = counterSlice.actions;
+export const { increment, decrement, reset, setValue } = counterSlice.actions;
 export default counterSlice.reducer;
