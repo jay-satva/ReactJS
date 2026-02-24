@@ -9,16 +9,16 @@ function Inventory(){
     const products = useSelector(state=>state.product.products)
     const columns = [
         {
-            title: "Product", dataIndex: 'name', key: 'name',
+            title: "Product", dataIndex: 'name', key: 'name', sorter: (a,b)=>a.name.localeCompare(b.name)
         },
         {
-            title: 'Price', dataIndex: 'price', key: 'price'
+            title: 'Price', dataIndex: 'price', key: 'price', sorter: (a,b)=>a.price-b.price
         },
         {
-            title: 'Quantity', dataIndex: 'quantity', key: 'quantity'
+            title: 'Quantity', dataIndex: 'quantity', key: 'quantity', sorter: (a,b)=>a.quantity-b.quantity
         },
         {
-            title: 'Brand', dataIndex: 'brand', key: 'brand'
+            title: 'Brand', dataIndex: 'brand', key: 'brand', sorter: (a,b)=>a.brand.localeCompare(b.brand)
         },
         {
             title: 'Action', key: 'action',

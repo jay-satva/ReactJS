@@ -10,14 +10,24 @@ function UserSearch() {
   const dispatch = useDispatch()
   const { users, loading, error } = useSelector((state) => state.user)
   const [search, setSearch] = useState("")
+  const [showSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => {
-    dispatch(fetchUser(""))
-  }, [])
+    const debounce = setTimeout(async()=>{
+      const result = await dispatch(fetchUser(search))
+      if (search.trim() !== "" && fetchUser.fulfilled.match(result) && result.payload.length>0) {
+      setShowSuccess(true)
+    }
+    }, 500)
+    return()=>clearTimeout(debounce)
+  }, [search])
 
-  const onSearch = (value) => {
-    dispatch(fetchUser(value))
-  }
+  // const onSearch = (value) => {
+  //   dispatch(fetchUser(value))
+  // }
+  // const onSearch = (e)=>{
+  //   setSearch(e.target.value)
+  // }
 
   return (
     <div style={{ padding: 30 }}>
@@ -33,12 +43,24 @@ function UserSearch() {
         />
       )}
 
+      {showSuccess && !error && (
+        <Alert
+          Title="Success"
+          description={`${users.length} users found`}
+          type="success"
+          showIcon
+          closable
+          onClose={()=>setShowSuccess(false)}
+          style={{ marginBottom: 20 }}
+        />
+      )}
+
       <Search
         placeholder="Search users"
         enterButton
         value={search}
         size="large"
-        onSearch={onSearch}
+        // onSearch={onSearch}
         onChange={(e) => setSearch(e.target.value)}
         style={{ marginBottom: 30 }}
       />
