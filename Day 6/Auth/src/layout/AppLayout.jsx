@@ -1,39 +1,26 @@
-import { Layout, theme } from "antd";
-import { useSelector } from "react-redux";
-import Sidebar from "./Sidebar";
-import AppHeader from "./AppHeader";
-import AppRoutes from "../routes/AppRoutes";
+import { Layout } from 'antd'
+import { Outlet } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import Sidebar from './Sidebar'
+import AppHeader from './AppHeader'
 
-const { Content } = Layout;
+const { Content } = Layout
 
 function AppLayout() {
-  const { collapsed } = useSelector((state) => state.dashboard);
+    const { user } = useSelector((state) => state.auth)
+    const { collapsed, darkTheme } = useSelector((state) => state.dashboard)
 
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
-  return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Sidebar collapsed={collapsed} />
-
-      <Layout>
-        <AppHeader collapsed={collapsed} />
-
-        <Content
-          style={{
-            margin: "24px 16px",
-            padding: 24,
-            minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-          }}
-        >
-          <AppRoutes />
-        </Content>
-      </Layout>
-    </Layout>
-  );
+    return (
+        <Layout style={{ minHeight: '100vh' }}>
+            <Sidebar user={user} collapsed={collapsed} darkTheme={darkTheme} />
+            <Layout>
+                <AppHeader user={user} darkTheme={darkTheme} collapsed={collapsed} />
+                <Content style={{ margin: '24px 16px', padding: 24 }}>
+                    <Outlet context={{ user }} />
+                </Content>
+            </Layout>
+        </Layout>
+    )
 }
 
-export default AppLayout;
+export default AppLayout
