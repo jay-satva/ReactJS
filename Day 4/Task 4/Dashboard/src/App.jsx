@@ -1,6 +1,6 @@
 import { ConfigProvider, theme as antdTheme } from "antd";
 import { useSelector } from "react-redux";
-import AppLayout from "./components/AppLayout"; 
+import AppLayout from "./layout/AppLayout"; 
 function App() {
   const { darkTheme } = useSelector((state) => state.admin);
 
