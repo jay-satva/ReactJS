@@ -1,29 +1,56 @@
 {
-    "posts": [
+    "users": [
         {
             "id": 1,
-            "title": "JSON-Server",
-            "author": "Amit"
-        },
-        {
-            "id": 2,
-            "title": "Node.js",
-            "author": "Mohit"
+            "name": "admin",
+            "email": "admin@gmail.com",
+            "password": "admin",
+            "roleID": 1
         }
     ],
-    "comments": [
+    "roles": [
+        {
+            "id": 1, 
+            "name": "Admin",
+            "permissions":[ 1,2,3,5,7]
+        },
+        {
+            "id": 2, 
+            "name": "HR"
+        },
+        {
+            "id": 3, 
+            "name": "Manager"
+        },
+        {
+            "id": 4, 
+            "name": "Supervisor"
+        }
+    ],
+    "permissions": [
+        {"id": 1, "action": "GET_USER"},
+        {"id": 2, "action": "ADD_USER"},
+        {"id": 3, "action": "EDIT_USER"},
+        {"id": 4, "action": "DELETE_USER"},
+        {"id": 5, "action": "GET_EMPLOYEE"},
+        {"id": 6, "action": "ADD_EMPLOYEE"},
+        {"id": 7, "action": "EDIT_EMPLOYEE"},
+        {"id": 8, "action": "DELETE_EMPLOYEE"},
+        {"id": 9, "action": "GET_PROJECT"},
+        {"id": 10, "action": "ADD_PROJECT"},
+        {"id": 11, "action": "EDIT_PROJECT"},
+        {"id": 12, "action": "DELETE_PROJECT"}
+    ],
+    "employees": [
         {
             "id": 1,
-            "body": "Great post!",
-            "postId": 1
-        },
-        {
-            "id": 2,
-            "body": "Informative!",
-            "postId": 2
-        }
+            "name": "Employee 1"
+        }        
     ],
-    "profile": {
-        "name": "Amit Kumar"
+    "projects": [
+        {
+        "id": 1,
+        "name": "Project 1"
     }
+    ]
 }

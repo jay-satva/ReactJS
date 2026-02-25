@@ -8,6 +8,7 @@ const authSlice = createSlice({
     initialState, name: 'auth', 
     reducers:{
         login:(state, action)=>{
+            const found = 
             state.isAuthenticated= true
             state.user = action.payload.user
             state.error = null
