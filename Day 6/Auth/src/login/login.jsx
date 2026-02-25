@@ -7,8 +7,7 @@ import { useState } from 'react'
 const Login = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const { isAuthenticated } = useSelector((state) => state.auth)
-    const [error, setError] = useState(false)
+    const { isAuthenticated, error } = useSelector((state) => state.auth)
     if (isAuthenticated) {
         return <Navigate to="/dashboard" replace />
     }
@@ -36,6 +35,7 @@ const Login = () => {
 
                 {error && (
                     <Alert 
+                    closable
                         message="Invalid username or password" 
                         type="error" 
                         style={{ marginBottom: 16 }} 

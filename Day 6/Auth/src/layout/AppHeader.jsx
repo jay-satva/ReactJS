@@ -36,6 +36,7 @@ function AppHeader({ user, darkTheme, collapsed }) {
             />
             <Space style={{ marginRight: 24 }}>
                 <Switch
+                style={{marginBottom: 5}}
                     checkedChildren="Dark"
                     unCheckedChildren="Light"
                     checked={darkTheme}

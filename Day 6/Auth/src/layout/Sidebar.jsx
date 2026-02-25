@@ -48,7 +48,7 @@ function Sidebar({ user, collapsed, darkTheme }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'white',
+                color: darkTheme ? 'white' : 'black',
                 fontWeight: 'bold'
             }}>
                 {!collapsed && 'MyApp'}
