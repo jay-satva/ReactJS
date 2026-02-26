@@ -168,6 +168,54 @@ server.delete('/users/:id', (req, res) => {
     res.json({ message: "User deleted successfully" })
 })
 
+//=================================================project crud= =====================================
+server.get('/projects', (req, res) => {
+    const db = router.db
+    const projects = db.get('projects').value()
+    const safeProject = projects.map(p => ({ id: p.id, name: p.name}))
+    res.json(safeProject)
+})
+
+// create
+server.post('/projects', (req, res) => {
+    const { name } = req.body
+    if (!name ) return res.status(400).json({ message: "All fields are required" })
+    const db = router.db
+    const existingProject = db.get('projects').find({ name }).value()
+    if (existingProject) return res.status(400).json({ message: "Project already exists" })
+
+    const newProj = { id: Date.now(), name }
+    db.get('projects').push(newProj).write()
+    res.status(201).json({ id: newProj.id, name})
+})
+
+//update
+server.put('/projects/:id', (req, res) => {
+    const { id } = req.params
+    const { name } = req.body
+
+    const db = router.db
+    const project = db.get('projects').find({ id: parseInt(id) }).value()
+    if (!project) return res.status(404).json({ message: "Project not found" })
+
+    const updatedData = { name }
+
+    db.get('projects').find({ id: parseInt(id) }).assign(updatedData).write()
+    res.json({ id: parseInt(id), name })
+})
+
+// delete
+server.delete('/projects/:id', (req, res) => {
+    const { id } = req.params
+    const db = router.db
+    const project = db.get('projects').find({ id: parseInt(id) }).value()
+    if (!project) return res.status(404).json({ message: "project not found" })
+
+    db.get('projects').remove({ id: parseInt(id) }).write()
+    res.json({ message: "Project deleted successfully" })
+})
+
+
 server.use(router)
 server.listen(3000, () => {
   console.log("Server running on port 3000")
