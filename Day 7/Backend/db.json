@@ -8,18 +8,11 @@
       "roleID": 1
     },
     {
-      "id": 1772096036429,
+      "id": 1772114721583,
       "name": "john",
-      "email": "john11@gmail.com",
-      "password": "$2b$12$h.mD.CVePfVAVOJi4JkgOepmXrMj7jgFNX.4OgqpqkANsLgq2hXZ.",
+      "email": "john@gmail.com",
+      "password": "$2b$12$IFbvuwwU4ThIDDrQX8sQ/OYofVQ857CXcAsQ6ND7o4GT9qhaCYGJq",
       "roleID": 2
-    },
-    {
-      "id": 1772111495296,
-      "name": "sdfdsfsadf",
-      "email": "jay@satvasolutions.com",
-      "password": "$2b$12$fd7etfO0xGTt2hH78F1viuJUiYNzzEUvvyA.L15UuQs205M40C54u",
-      "roleID": 3
     }
   ],
   "roles": [
@@ -29,8 +22,8 @@
       "permissions": [
         1,
         2,
-        4,
         3,
+        4,
         5,
         6,
         7,
@@ -45,11 +38,8 @@
       ]
     },
     {
-      "name": "jack",
-      "email": "jack@gmail.com",
-      "password": "jack123",
-      "roleID": 3,
       "id": 2,
+      "name": "HR",
       "permissions": [
         5,
         6,
@@ -60,40 +50,22 @@
     {
       "id": 3,
       "name": "Manager",
-      "permissions": []
+      "permissions": [
+        9,
+        10,
+        11,
+        12
+      ]
     },
     {
       "id": 4,
       "name": "Supervisor",
-      "permissions": []
-    },
-    {
-      "name": "jack",
-      "email": "jack@gmail.com",
-      "password": "jack123",
-      "roleID": 3,
-      "id": 5
-    },
-    {
-      "name": "jack",
-      "email": "jack@gmail.com",
-      "password": "jack123",
-      "roleID": 3,
-      "id": 6
-    },
-    {
-      "name": "jack",
-      "email": "jack@gmail.com",
-      "password": "jack123",
-      "roleID": 3,
-      "id": 7
-    },
-    {
-      "name": "jack",
-      "email": "jack@gmail.com",
-      "password": "jack123",
-      "roleID": 3,
-      "id": 8
+      "permissions": [
+        1,
+        5,
+        9,
+        13
+      ]
     }
   ],
   "permissions": [
@@ -161,21 +133,41 @@
   "employees": [
     {
       "id": 1,
-      "name": "Employee 1"
+      "name": "Alice Johnson",
+      "department": "Engineering",
+      "email": "alice@company.com"
     },
     {
-      "name": "Employee 1",
-      "id": 2
+      "id": 2,
+      "name": "Bob Smith",
+      "department": "Marketing",
+      "email": "bob@company.com"
     },
     {
-      "name": "Employee 1",
-      "id": 3
+      "id": 3,
+      "name": "Carol White",
+      "department": "HR",
+      "email": "carol@company.com"
     }
   ],
   "projects": [
     {
       "id": 1,
-      "name": "Project 1"
+      "name": "Project Alpha",
+      "status": "active",
+      "description": "Main product development"
+    },
+    {
+      "id": 2,
+      "name": "Project Beta",
+      "status": "pending",
+      "description": "Research and planning"
+    },
+    {
+      "id": 3,
+      "name": "Project Gamma",
+      "status": "complete",
+      "description": "Legacy migration"
     }
   ]
 }

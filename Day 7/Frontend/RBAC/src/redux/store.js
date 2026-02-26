@@ -5,11 +5,15 @@ import authReducer from '../redux/slices/authSlice'
 import storage from 'redux-persist/lib/storage'
 import {injectStore} from '../services/api'
 import usersReducer from '../redux/slices/usersSlice'
+import employeesReducer from '../redux/slices/employeesSlice'
+import projectsReducer from '../redux/slices/projectsSlice'
 
 const rootReducer = combineReducers({
     auth: authReducer,
     ui: uiReducer,
     users: usersReducer,
+    employees: employeesReducer,
+    projects: projectsReducer
 })
 const persistConfig = {
     key: 'root', storage, whitelist: ['auth', 'ui'],

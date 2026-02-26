@@ -226,13 +226,13 @@ server.delete('/projects/:id', (req, res) => {
 server.get('/employees', (req, res) => {
     const db = router.db
     const employees = db.get('employees').value()
-    const safeemp = employees.map(p => ({ id: p.id, name: p.name}))
+    const safeemp = employees.map(p => ({ id: p.id, name: p.name, department: p.department, email: p.email}))
     res.json(safeemp)
 })
 
 // create
 server.post('/employees', (req, res) => {
-    const { name } = req.body
+    const { name, department, email } = req.body
     if (!name ) return res.status(400).json({ message: "All fields are required" })
     const db = router.db
     const existingEmp = db.get('employees').find({ name }).value()
@@ -240,7 +240,7 @@ server.post('/employees', (req, res) => {
 
     const newEmp = { id: Date.now(), name }
     db.get('employees').push(newEmp).write()
-    res.status(201).json({ id: newEmp.id, name})
+    res.status(201).json({ id: newEmp.id, name, department, email})
 })
 
 //update
@@ -252,10 +252,10 @@ server.put('/employees/:id', (req, res) => {
     const employee = db.get('employees').find({ id: parseInt(id) }).value()
     if (!employee) return res.status(404).json({ message: "Employee not found" })
 
-    const updatedData = { name }
+    const updatedData = { name, department, email }
 
     db.get('employees').find({ id: parseInt(id) }).assign(updatedData).write()
-    res.json({ id: parseInt(id), name })
+    res.json({ id: parseInt(id), name, department, email })
 })
 
 // delete
