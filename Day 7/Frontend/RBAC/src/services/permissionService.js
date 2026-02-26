@@ -10,9 +10,7 @@ const permissionService = {
       if (!role || !role.permissions) return []
       const permRes = await api.get("/permissions")
       const allPermissions = permRes.data
-      return allPermissions.filter((perm) =>
-        role.permissions.includes(perm.id),
-      )
+      return allPermissions.filter((perm) => role.permissions.includes(perm.id))
     } catch (error) {
       throw error
     }

@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 
 // The plain password you want to use
-const password = "admin";
+const password = "john123";
 
 // Generate a hash
 const hash = bcrypt.hashSync(password, 12);

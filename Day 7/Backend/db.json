@@ -1,62 +1,128 @@
 {
-    "users": [
-        {
-            "id": 1,
-            "name": "admin",
-            "email": "admin@gmail.com",
-            "password": "$2b$12$T1xOG5RpE6bKJL07i7DINuha1xzzGMQbjdAqqkLRbeNso23gqaqT6",
-            "roleID": 1
-        }
-    ],
-    "roles": [
-        {
-            "id": 1, 
-            "name": "Admin",
-            "permissions":[ 1,2,3,5,6,7,8,9,10,11,12,13,14]
-        },
-        {
-            "id": 2, 
-            "name": "HR",
-            "permissions":[ ]
-        },
-        {
-            "id": 3, 
-            "name": "Manager",
-            "permissions":[ ]
-        },
-        {
-            "id": 4, 
-            "name": "Supervisor",
-            "permissions":[ ]
-        }
-    ],
-    "permissions": [
-        {"id": 1, "action": "GET_USER"},
-        {"id": 2, "action": "ADD_USER"},
-        {"id": 3, "action": "EDIT_USER"},
-        {"id": 4, "action": "DELETE_USER"},
-        {"id": 5, "action": "GET_EMPLOYEE"},
-        {"id": 6, "action": "ADD_EMPLOYEE"},
-        {"id": 7, "action": "EDIT_EMPLOYEE"},
-        {"id": 8, "action": "DELETE_EMPLOYEE"},
-        {"id": 9, "action": "GET_PROJECT"},
-        {"id": 10, "action": "ADD_PROJECT"},
-        {"id": 11, "action": "EDIT_PROJECT"},
-        {"id": 12, "action": "DELETE_PROJECT"},
-        {"id": 13, "action": "GET_ROLE"},
-        {"id": 14, "action": "EDIT_ROLE_PERMISSIONS"},
-        {"id": 15, "action": "GET_PERMISSION"}
-    ],
-    "employees": [
-        {
-            "id": 1,
-            "name": "Employee 1"
-        }        
-    ],
-    "projects": [
-        {
-        "id": 1,
-        "name": "Project 1"
+  "users": [
+    {
+      "id": 1,
+      "name": "admin",
+      "email": "admin@gmail.com",
+      "password": "$2b$12$T1xOG5RpE6bKJL07i7DINuha1xzzGMQbjdAqqkLRbeNso23gqaqT6",
+      "roleID": 1
+    },
+    {
+      "id": 1772096036429,
+      "name": "john",
+      "email": "john@gmail.com",
+      "password": "$2b$12$h.mD.CVePfVAVOJi4JkgOepmXrMj7jgFNX.4OgqpqkANsLgq2hXZ.",
+      "roleID": 2
     }
-    ]
+  ],
+  "roles": [
+    {
+      "id": 1,
+      "name": "Admin",
+      "permissions": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "id": 2,
+      "name": "HR",
+      "permissions": []
+    },
+    {
+      "id": 3,
+      "name": "Manager",
+      "permissions": []
+    },
+    {
+      "id": 4,
+      "name": "Supervisor",
+      "permissions": []
+    }
+  ],
+  "permissions": [
+    {
+      "id": 1,
+      "action": "GET_USER"
+    },
+    {
+      "id": 2,
+      "action": "ADD_USER"
+    },
+    {
+      "id": 3,
+      "action": "EDIT_USER"
+    },
+    {
+      "id": 4,
+      "action": "DELETE_USER"
+    },
+    {
+      "id": 5,
+      "action": "GET_EMPLOYEE"
+    },
+    {
+      "id": 6,
+      "action": "ADD_EMPLOYEE"
+    },
+    {
+      "id": 7,
+      "action": "EDIT_EMPLOYEE"
+    },
+    {
+      "id": 8,
+      "action": "DELETE_EMPLOYEE"
+    },
+    {
+      "id": 9,
+      "action": "GET_PROJECT"
+    },
+    {
+      "id": 10,
+      "action": "ADD_PROJECT"
+    },
+    {
+      "id": 11,
+      "action": "EDIT_PROJECT"
+    },
+    {
+      "id": 12,
+      "action": "DELETE_PROJECT"
+    },
+    {
+      "id": 13,
+      "action": "GET_ROLE"
+    },
+    {
+      "id": 14,
+      "action": "EDIT_ROLE_PERMISSIONS"
+    },
+    {
+      "id": 15,
+      "action": "GET_PERMISSION"
+    }
+  ],
+  "employees": [
+    {
+      "id": 1,
+      "name": "Employee 1"
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "name": "Project 1"
+    }
+  ]
 }

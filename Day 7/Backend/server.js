@@ -10,7 +10,7 @@ const SECRET_KEY = "supersecretkey"
 
 server.use(middlewares)
 server.use(jsonServer.bodyParser)
-
+//===================================================login===========================================
 server.post('/login', (req, res) => {
     const { username, password } = req.body
     console.log(req.body)
@@ -36,7 +36,7 @@ server.post('/login', (req, res) => {
         token, user: { id: user.id, name: user.name, roleId: user.roleID }
     })
 })
-
+//================================================================auth================================
 server.use((req, res, next) => {
 
     if (req.path === '/login' || req.path.startsWith("/permissions") || req.path.startsWith("/roles")) return next()
@@ -56,7 +56,7 @@ server.use((req, res, next) => {
         return res.status(403).json({ message: "Invalid token" })
     }
 })
-
+//=======================================================permission=====================================
 server.use((req, res, next) => {
   if (req.path === "/login" || req.path.startsWith("/permissions") || req.path.startsWith("/roles")) return next()
 
@@ -75,9 +75,7 @@ server.use((req, res, next) => {
   if (!resource) return next()
 
   // then convert plural to singular
-  const resourceSingular = resource.endsWith("s")
-    ? resource.slice(0, -1)
-    : resource
+  const resourceSingular = resource.endsWith("s") ? resource.slice(0, -1) : resource
   const resourceUpper = resourceSingular.toUpperCase()
 
   let actionPrefix = ""
@@ -119,6 +117,57 @@ server.use((req, res, next) => {
 
   next()
 })
+
+//===================================================user crus ==========================================
+
+server.get('/users', (req, res) => {
+    const db = router.db
+    const users = db.get('users').value()
+    const safeUsers = users.map(u => ({ id: u.id, name: u.name, email: u.email, roleID: u.roleID }))
+    res.json(safeUsers)
+})
+
+// create
+server.post('/users', (req, res) => {
+    const { name, email, password, roleID } = req.body
+    if (!name || !email || !password || !roleID) return res.status(400).json({ message: "All fields are required" })
+    const db = router.db
+    const existingUser = db.get('users').find({ email }).value()
+    if (existingUser) return res.status(400).json({ message: "Email already exists" })
+
+    const hashedPassword = bcrypt.hashSync(password, 12)
+    const newUser = { id: Date.now(), name, email, password: hashedPassword, roleID }
+    db.get('users').push(newUser).write()
+    res.status(201).json({ id: newUser.id, name, email, roleID })
+})
+
+// update
+server.put('/users/:id', (req, res) => {
+    const { id } = req.params
+    const { name, email, password, roleID } = req.body
+
+    const db = router.db
+    const user = db.get('users').find({ id: parseInt(id) }).value()
+    if (!user) return res.status(404).json({ message: "User not found" })
+
+    const updatedData = { name, email, roleID }
+    if (password) updatedData.password = bcrypt.hashSync(password, 12)
+
+    db.get('users').find({ id: parseInt(id) }).assign(updatedData).write()
+    res.json({ id: parseInt(id), name, email, roleID })
+})
+
+// delete
+server.delete('/users/:id', (req, res) => {
+    const { id } = req.params
+    const db = router.db
+    const user = db.get('users').find({ id: parseInt(id) }).value()
+    if (!user) return res.status(404).json({ message: "User not found" })
+
+    db.get('users').remove({ id: parseInt(id) }).write()
+    res.json({ message: "User deleted successfully" })
+})
+
 server.use(router)
 server.listen(3000, () => {
   console.log("Server running on port 3000")
