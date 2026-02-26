@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import AppRoutes from '../src/routes/AppRoutes'
 
 function App() {
-    const { darkTheme } = useSelector((state) => state.dashboard)
+    const { darkTheme } = useSelector((state) => state.ui)
 
     return (
         <ConfigProvider theme={{

@@ -1,7 +1,7 @@
 import { Button, Form, Input, Alert } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
-import { login } from '../redux/slices/authSlice'
 import { Navigate } from 'react-router-dom'
+import { loginUser } from '../redux/slices/authSlice'
 
 const Login = () => {
     const dispatch = useDispatch()
@@ -11,7 +11,7 @@ const Login = () => {
     }
 
     const onFinish = (values) => {
-        dispatch(login(values))
+        dispatch(loginUser(values))
     }
 
     return (

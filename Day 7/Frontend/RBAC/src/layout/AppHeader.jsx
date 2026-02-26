@@ -3,8 +3,8 @@ import {
     MenuFoldOutlined, MenuUnfoldOutlined, LogoutOutlined 
 } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'
-import { toggleSidebar, toggleTheme } from '../redux/slice/dashSlice'
-import { logout } from '../redux/slice/authSlice'
+import { toggleSidebar, toggleTheme } from '../redux/slices/uiSlice'
+import { logout } from '../redux/slices/authSlice'
 import { useNavigate } from 'react-router-dom'
 import { theme } from 'antd'
 

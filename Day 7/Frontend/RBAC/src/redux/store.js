@@ -3,6 +3,7 @@ import { persistStore, persistReducer } from 'redux-persist'
 import uiReducer from '../redux/slices/uiSlice'
 import authReducer from '../redux/slices/authSlice'
 import storage from 'redux-persist/lib/storage'
+import {injectStore} from '../services/api'
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -18,5 +19,6 @@ export const store = configureStore({
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({ serializableCheck: false }),
 })
+injectStore(store)
 
 export const persistor = persistStore(store)
