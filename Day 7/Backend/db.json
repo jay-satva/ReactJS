@@ -10,15 +10,15 @@
     {
       "id": 1772096036429,
       "name": "john",
-      "email": "john@gmail.com",
+      "email": "john11@gmail.com",
       "password": "$2b$12$h.mD.CVePfVAVOJi4JkgOepmXrMj7jgFNX.4OgqpqkANsLgq2hXZ.",
       "roleID": 2
     },
     {
-      "id": 1772098167581,
-      "name": "jack",
-      "email": "jack@gmail.com",
-      "password": "$2b$12$OqK9n25RBOULM0NfcEWwK.D88.5YGZLRWxBFEiNCWW.bcUiwdJdjK",
+      "id": 1772111495296,
+      "name": "sdfdsfsadf",
+      "email": "jay@satvasolutions.com",
+      "password": "$2b$12$fd7etfO0xGTt2hH78F1viuJUiYNzzEUvvyA.L15UuQs205M40C54u",
       "roleID": 3
     }
   ],
@@ -29,6 +29,7 @@
       "permissions": [
         1,
         2,
+        4,
         3,
         5,
         6,

@@ -61,7 +61,7 @@ server.post('/login', (req, res) => {
 //=======================================================permission=====================================
 server.use((req, res, next) => {
   if (req.path === "/login") return next()
-  if ((req.path.startsWith("/roles") || req.path.startsWith("/permissions")) && req.method === "GET") return next()
+//   if ((req.path.startsWith("/roles") || req.path.startsWith("/permissions")) && req.method === "GET") return next()
   const db = router.db
 
   const role = db.get("roles").find({ id: req.user.roleId }).value()
@@ -162,8 +162,13 @@ server.put('/users/:id', (req, res) => {
 // delete
 server.delete('/users/:id', (req, res) => {
     const { id } = req.params
+    console.log("DELETE called, id:", id, "req.user:", req.user)  
+        if (parseInt(id) === req.user.id) {
+        return res.status(400).json({ message: "You cannot delete your own account" })
+    }
     const db = router.db
     const user = db.get('users').find({ id: parseInt(id) }).value()
+    console.log("Found user:", user)
     if (!user) return res.status(404).json({ message: "User not found" })
 
     db.get('users').remove({ id: parseInt(id) }).write()

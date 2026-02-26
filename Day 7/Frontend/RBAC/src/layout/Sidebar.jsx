@@ -1,7 +1,8 @@
 import { Menu } from 'antd'
 import { Layout } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { DashboardOutlined, UserOutlined, UploadOutlined } from '@ant-design/icons'
+import { useSelector } from 'react-redux'
+import { DashboardOutlined, UserOutlined, TeamOutlined, ProjectOutlined, SafetyOutlined } from '@ant-design/icons'
 
 const { Sider } = Layout
 
@@ -10,27 +11,41 @@ const ALL_MENU_ITEMS = [
         key: '/dashboard',
         icon: <DashboardOutlined />,
         label: 'Dashboard',
-        roles: ['admin', 'user']  
+        permission: null 
     },
     {
         key: '/users',
         icon: <UserOutlined />,
         label: 'Users',
-        roles: ['admin']          
+        permission: 'GET_USER'        
     },
     {
-        key: '/uploads',
-        icon: <UploadOutlined />,
-        label: 'Uploads',
-        roles: ['admin', 'user']   
+        key: '/employees',
+        icon: <TeamOutlined />,
+        label: 'Employees',
+        permission: 'GET_EMPLOYEE'        
+    },
+    {
+        key: '/projects',
+        icon: <ProjectOutlined />,
+        label: 'Projects',
+        permission: 'GET_PROJECT'        
+    },
+    {
+        key: '/roles',
+        icon: <SafetyOutlined />,
+        label: 'Roles',
+        permission: 'GET_ROLE'        
     },
 ]
 
 function Sidebar({ user, collapsed, darkTheme }) {
     const navigate = useNavigate()
     const location = useLocation()
-    const menuItems = ALL_MENU_ITEMS.filter(item => 
-        item.roles.includes(user?.role)
+    const {permissions} = useSelector((state)=>state.auth)
+    const permissionSet = new Set(permissions.map((p)=>p.action))
+    const visible = ALL_MENU_ITEMS.filter((item)=> item.permission === null 
+        || permissionSet.has(item.permission)
     )
 
     return (
@@ -51,14 +66,14 @@ function Sidebar({ user, collapsed, darkTheme }) {
                 color: darkTheme ? 'white' : 'black',
                 fontWeight: 'bold'
             }}>
-                {!collapsed && 'MyApp'}
+                {!collapsed && 'RBAC App'}
             </div>
             
             <Menu
                 mode="inline"
                 theme={darkTheme ? 'dark' : 'light'}
                 selectedKeys={[location.pathname]}
-                items={menuItems}
+                items={visible}
                 onClick={(e) => navigate(e.key)}
             />
         </Sider>

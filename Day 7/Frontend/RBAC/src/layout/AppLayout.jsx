@@ -8,7 +8,7 @@ const { Content } = Layout
 
 function AppLayout() {
     const { user } = useSelector((state) => state.auth)
-    const { collapsed, darkTheme } = useSelector((state) => state.dashboard)
+    const { collapsed, darkTheme } = useSelector((state) => state.ui)
 
     return (
         <Layout style={{ minHeight: '100vh' }}>

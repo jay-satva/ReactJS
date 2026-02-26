@@ -47,6 +47,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.user = null
       state.error = null
+      state.permissions =[]
       state.token = null
     },
   },

@@ -4,6 +4,10 @@ import ProtectedRoute from "./ProtectedRoute";
 import Login from "../components/login";
 import AppLayout from "../layout/AppLayout"
 import PermissionGuard from "./PermissionGuard";
+import Users from "../components/Users";
+import Employee from "../components/Employee";
+import Projects from "../components/Projects"
+import Roles from "../components/Roles"
 
 function Unauthorized() {
     return (
@@ -25,11 +29,19 @@ function AppRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
 
           <Route element={<PermissionGuard allowedPermissions={["GET_USER"]} />}>
-            <Route path="/users" element={<div>User List Page</div>} />
+            <Route path="/users" element={<Users/>} />
           </Route>
 
-          <Route element={<PermissionGuard allowedPermissions={["ADD_PROJECT"]} />}>
-            <Route path="/projects/add" element={<div>Add Project Page</div>} />
+          <Route element={<PermissionGuard allowedPermissions={["GET_PROJECT"]} />}>
+            <Route path="/projects" element={<Projects/>} />
+          </Route>
+
+          <Route element={<PermissionGuard allowedPermissions={["GET_EMPLOYEE"]} />}>
+            <Route path="/employees" element={<Employee/>} />
+          </Route>
+
+          <Route element={<PermissionGuard allowedPermissions={["GET_ROLE"]} />}>
+            <Route path="/roles" element={<Roles/>} />
           </Route>
         </Route>
       </Route>
