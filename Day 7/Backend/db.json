@@ -13,6 +13,13 @@
       "email": "john@gmail.com",
       "password": "$2b$12$h.mD.CVePfVAVOJi4JkgOepmXrMj7jgFNX.4OgqpqkANsLgq2hXZ.",
       "roleID": 2
+    },
+    {
+      "id": 1772098167581,
+      "name": "jack",
+      "email": "jack@gmail.com",
+      "password": "$2b$12$OqK9n25RBOULM0NfcEWwK.D88.5YGZLRWxBFEiNCWW.bcUiwdJdjK",
+      "roleID": 3
     }
   ],
   "roles": [
@@ -32,13 +39,22 @@
         11,
         12,
         13,
-        14
+        14,
+        15
       ]
     },
     {
+      "name": "jack",
+      "email": "jack@gmail.com",
+      "password": "jack123",
+      "roleID": 3,
       "id": 2,
-      "name": "HR",
-      "permissions": []
+      "permissions": [
+        5,
+        6,
+        7,
+        8
+      ]
     },
     {
       "id": 3,
@@ -49,6 +65,34 @@
       "id": 4,
       "name": "Supervisor",
       "permissions": []
+    },
+    {
+      "name": "jack",
+      "email": "jack@gmail.com",
+      "password": "jack123",
+      "roleID": 3,
+      "id": 5
+    },
+    {
+      "name": "jack",
+      "email": "jack@gmail.com",
+      "password": "jack123",
+      "roleID": 3,
+      "id": 6
+    },
+    {
+      "name": "jack",
+      "email": "jack@gmail.com",
+      "password": "jack123",
+      "roleID": 3,
+      "id": 7
+    },
+    {
+      "name": "jack",
+      "email": "jack@gmail.com",
+      "password": "jack123",
+      "roleID": 3,
+      "id": 8
     }
   ],
   "permissions": [
@@ -106,7 +150,7 @@
     },
     {
       "id": 14,
-      "action": "EDIT_ROLE_PERMISSIONS"
+      "action": "EDIT_ROLE"
     },
     {
       "id": 15,
@@ -117,6 +161,14 @@
     {
       "id": 1,
       "name": "Employee 1"
+    },
+    {
+      "name": "Employee 1",
+      "id": 2
+    },
+    {
+      "name": "Employee 1",
+      "id": 3
     }
   ],
   "projects": [
