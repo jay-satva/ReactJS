@@ -1,0 +1,187 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "admin",
+      "email": "admin@gmail.com",
+      "password": "$2b$12$T1xOG5RpE6bKJL07i7DINuha1xzzGMQbjdAqqkLRbeNso23gqaqT6",
+      "roleID": 1
+    },
+    {
+      "id": 1772114721583,
+      "name": "john",
+      "email": "john@gmail.com",
+      "password": "$2b$12$IFbvuwwU4ThIDDrQX8sQ/OYofVQ857CXcAsQ6ND7o4GT9qhaCYGJq",
+      "roleID": 2
+    },
+    {
+      "id": 1772165261568,
+      "name": "jack",
+      "email": "jack@gmail.com",
+      "password": "$2b$12$6Mk17cn5EiaPlu1yHEAvfOsQZDGJtFOVQjJZuWRFYG25f45VvkyYC",
+      "roleID": 4
+    }
+  ],
+  "roles": [
+    {
+      "id": 1,
+      "name": "Admin",
+      "permissions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "id": 2,
+      "name": "HR",
+      "permissions": [
+        5,
+        6,
+        7,
+        8,
+        3,
+        1
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Manager",
+      "permissions": [
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Supervisor",
+      "permissions": [
+        1,
+        5,
+        9
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "id": 1,
+      "action": "GET_USER"
+    },
+    {
+      "id": 2,
+      "action": "ADD_USER"
+    },
+    {
+      "id": 3,
+      "action": "EDIT_USER"
+    },
+    {
+      "id": 4,
+      "action": "DELETE_USER"
+    },
+    {
+      "id": 5,
+      "action": "GET_EMPLOYEE"
+    },
+    {
+      "id": 6,
+      "action": "ADD_EMPLOYEE"
+    },
+    {
+      "id": 7,
+      "action": "EDIT_EMPLOYEE"
+    },
+    {
+      "id": 8,
+      "action": "DELETE_EMPLOYEE"
+    },
+    {
+      "id": 9,
+      "action": "GET_PROJECT"
+    },
+    {
+      "id": 10,
+      "action": "ADD_PROJECT"
+    },
+    {
+      "id": 11,
+      "action": "EDIT_PROJECT"
+    },
+    {
+      "id": 12,
+      "action": "DELETE_PROJECT"
+    },
+    {
+      "id": 13,
+      "action": "GET_ROLE"
+    },
+    {
+      "id": 14,
+      "action": "EDIT_ROLE"
+    },
+    {
+      "id": 15,
+      "action": "GET_PERMISSION"
+    }
+  ],
+  "employees": [
+    {
+      "id": 2,
+      "name": "Bob Smith",
+      "department": "Marketing",
+      "email": "bob@company.com"
+    },
+    {
+      "id": 3,
+      "name": "Carol White",
+      "department": "HR",
+      "email": "carol@company.com"
+    },
+    {
+      "id": 1772189651379,
+      "name": "Alice Johnson",
+      "department": "Engineering",
+      "email": "alice@gmail.com"
+    },
+    {
+      "id": 1772190022756,
+      "name": "John Doe",
+      "department": "IT",
+      "email": "john@gmail.com"
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "name": "Project Alpha",
+      "status": "active",
+      "description": "Main product development"
+    },
+    {
+      "id": 2,
+      "name": "Project Beta",
+      "status": "pending",
+      "description": "Research and planning"
+    },
+    {
+      "id": 3,
+      "name": "Project Gamma",
+      "status": "complete",
+      "description": "Legacy migration"
+    }
+  ]
+}
