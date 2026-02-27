@@ -1,4 +1,4 @@
-import { ConfigProvider, theme as antdTheme } from 'antd'
+import { ConfigProvider, theme as antdTheme, App as AntdApp } from 'antd'
 import { useSelector } from 'react-redux'
 import AppRoutes from '../src/routes/AppRoutes'
 
@@ -7,11 +7,13 @@ function App() {
 
     return (
         <ConfigProvider theme={{
-            algorithm: darkTheme 
-                ? antdTheme.darkAlgorithm 
+            algorithm: darkTheme
+                ? antdTheme.darkAlgorithm
                 : antdTheme.defaultAlgorithm
         }}>
-            <AppRoutes />
+            <AntdApp>
+                <AppRoutes />
+            </AntdApp>
         </ConfigProvider>
     )
 }

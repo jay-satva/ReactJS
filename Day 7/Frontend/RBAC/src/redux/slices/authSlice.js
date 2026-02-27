@@ -50,6 +50,9 @@ const authSlice = createSlice({
       state.permissions =[]
       state.token = null
     },
+    updatePermissions: (state, action)=>{
+      state.permissions = action.payload
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -70,5 +73,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { logout } = authSlice.actions
+export const { logout, updatePermissions } = authSlice.actions
 export default authSlice.reducer

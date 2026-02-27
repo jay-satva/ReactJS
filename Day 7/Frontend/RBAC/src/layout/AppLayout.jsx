@@ -3,10 +3,12 @@ import { Outlet } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Sidebar from './Sidebar'
 import AppHeader from './AppHeader'
+import { useRefreshPermissions } from '../hooks/useRefreshPermissions'
 
 const { Content } = Layout
 
 function AppLayout() {
+    useRefreshPermissions()
     const { user } = useSelector((state) => state.auth)
     const { collapsed, darkTheme } = useSelector((state) => state.ui)
 

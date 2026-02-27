@@ -61,7 +61,7 @@ server.post('/login', (req, res) => {
 //=======================================================permission=====================================
 server.use((req, res, next) => {
   if (req.path === "/login") return next()
-//   if ((req.path.startsWith("/roles") || req.path.startsWith("/permissions")) && req.method === "GET") return next()
+  if ((req.path.startsWith("/roles") || req.path.startsWith("/permissions")) && req.method === "GET") return next()
   const db = router.db
 
   const role = db.get("roles").find({ id: req.user.roleId }).value()
@@ -280,7 +280,6 @@ server.get('/permissions', (req, res) => {
 server.get('/roles', (req, res) => {
     const db = router.db
     const roles = db.get('roles').value()
-    // only return the 4 real roles (filter out junk entries)
     const cleanRoles = roles.filter(r => ['Admin','HR','Manager','Supervisor'].includes(r.name))
     res.json(cleanRoles)
 })
@@ -297,13 +296,14 @@ server.patch('/roles/:id', (req, res) => {
     if (!Array.isArray(permissions)) return res.status(400).json({ message: "permissions must be an array" })
 
     const db = router.db
-    const role = db.get('roles').find({ id: parseInt(req.params.id) }).value()
+    const id = parseInt(req.params.id)  // ✅ id declared HERE
+    const role = db.get('roles').find({ id }).value()
     if (!role) return res.status(404).json({ message: "Role not found" })
 
-    db.get('roles').find({ id: parseInt(req.params.id) }).assign({ permissions }).write()
-    res.json({ ...role, permissions })
+    db.get('roles').find({ id }).assign({ permissions }).write()
+    const updated = db.get('roles').find({ id }).value()
+    res.json(updated)
 })
-
 
 server.use(router)
 server.listen(3000, () => {
